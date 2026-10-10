@@ -1,0 +1,3 @@
+# Compose include retains deploy/ as the base directory for all relative mounts.
+include:
+  - deploy/docker-compose.yml

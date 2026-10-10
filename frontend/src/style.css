@@ -1,0 +1,30 @@
+:root {
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #192b42;
+  background: #f3f6fa;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --el-color-primary: #2563a7;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; text-decoration: none; }
+.app-header { height: 76px; padding: 0 5vw; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: #fff; border-bottom: 1px solid #dbe3ed; }
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 650; }
+.brand-mark { padding: 9px; color: #fff; background: #13263f; border-radius: 7px; font-size: 14px; }
+.page-content { max-width: 1200px; margin: 0 auto; padding: 60px 24px; }
+.eyebrow { color: #2563a7; font-size: 12px; letter-spacing: 0.12em; font-weight: 600; }
+h1 { margin: 20px 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.02em; }
+.lead { max-width: 700px; color: #53657c; line-height: 1.9; }
+.bootstrap-card { margin-top: 32px; max-width: 760px; border-radius: 10px; }
+.card-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+h2 { margin: 0; font-size: 18px; }
+.capability-list { padding-left: 20px; line-height: 2.1; }
+.muted { color: #738298; font-size: 13px; }
+@media (max-width: 600px) {
+  .app-header { padding: 0 18px; }
+  .app-header > .el-tag { display: none; }
+  .page-content { padding-top: 32px; }
+}

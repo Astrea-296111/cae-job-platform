@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  - job_name: cae-backend
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [backend:8080]
+        labels:
+          environment: public-demo
+
+  - job_name: prometheus
+    static_configs:
+      - targets: [localhost:9090]

@@ -1,0 +1,269 @@
+name: cae-job-platform
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-worker: &worker
+  image: cae-worker:local
+  build:
+    context: ../worker
+    extra_hosts:
+      - "${CAE_BUILD_PROXY_HOST:-cloud-proxy}=${CAE_BUILD_PROXY_IP:-127.0.0.1}"
+    secrets: [build_proxy, tls_ca]
+  restart: unless-stopped
+  init: true
+  environment: &worker-environment
+    DATA_ROOT: /data
+    CASE_ROOT: /cases
+    BACKEND_URL: http://backend:8080
+    SERVICE_TOKEN: ${SERVICE_TOKEN:-demo-service-token}
+    HEARTBEAT_INTERVAL_SECONDS: "5"
+  volumes:
+    - shared-data:/data
+    - ../demo-data:/cases:ro
+  depends_on:
+    backend:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+    interval: 10s
+    timeout: 5s
+    retries: 6
+    start_period: 15s
+  logging: *logging
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: cae
+      MYSQL_USER: cae
+      MYSQL_PASSWORD: ${DB_PASSWORD:-demo-cae-password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-demo-root-password}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    logging: *logging
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    restart: unless-stopped
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: cae
+      RABBITMQ_DEFAULT_PASS: ${MQ_PASSWORD:-demo-cae-password}
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    logging: *logging
+
+  backend:
+    image: cae-backend:local
+    build:
+      context: ../backend
+      extra_hosts:
+        - "${CAE_BUILD_PROXY_HOST:-cloud-proxy}=${CAE_BUILD_PROXY_IP:-127.0.0.1}"
+      secrets: [build_proxy, maven_settings, java_truststore]
+    restart: unless-stopped
+    init: true
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/cae?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+      DB_USER: cae
+      DB_PASSWORD: ${DB_PASSWORD:-demo-cae-password}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: cae
+      SPRING_RABBITMQ_PASSWORD: ${MQ_PASSWORD:-demo-cae-password}
+      REDIS_HOST: redis
+      DATA_ROOT: /data
+      CASE_ROOT: /cases
+      WORKER_URLS: node-a=http://worker-node-a:8000,node-b=http://worker-node-b:8000,node-c=http://worker-node-c:8000
+      SERVICE_TOKEN: ${SERVICE_TOKEN:-demo-service-token}
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=65.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - shared-data:/data
+      - ../demo-data:/cases:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+    logging: *logging
+
+  worker-node-a:
+    <<: *worker
+    environment:
+      <<: *worker-environment
+      NODE_ID: node-a
+      CPU_TOTAL: "16"
+      MEMORY_TOTAL_GB: "32"
+      SOLVER_TAGS: STRUCTURE,NVH
+      REGISTRY_PATH: /data/agents/node-a/registry.sqlite3
+    ports:
+      - "127.0.0.1:8001:8000"
+
+  worker-node-b:
+    <<: *worker
+    environment:
+      <<: *worker-environment
+      NODE_ID: node-b
+      CPU_TOTAL: "32"
+      MEMORY_TOTAL_GB: "64"
+      SOLVER_TAGS: STRUCTURE,CRASH
+      REGISTRY_PATH: /data/agents/node-b/registry.sqlite3
+    ports:
+      - "127.0.0.1:8002:8000"
+
+  worker-node-c:
+    <<: *worker
+    environment:
+      <<: *worker-environment
+      NODE_ID: node-c
+      CPU_TOTAL: "24"
+      MEMORY_TOTAL_GB: "48"
+      SOLVER_TAGS: CFD,STRUCTURE
+      REGISTRY_PATH: /data/agents/node-c/registry.sqlite3
+    ports:
+      - "127.0.0.1:8003:8000"
+
+  frontend:
+    image: cae-frontend:local
+    build:
+      context: ../frontend
+      extra_hosts:
+        - "${CAE_BUILD_PROXY_HOST:-cloud-proxy}=${CAE_BUILD_PROXY_IP:-127.0.0.1}"
+      secrets: [build_proxy, tls_ca]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging: *logging
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8088:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging: *logging
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging: *logging
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-demo-grafana-password}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    logging: *logging
+
+volumes:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:
+  shared-data:
+  prometheus-data:
+  grafana-data:
+
+# Empty defaults retain ordinary direct-network builds outside managed cloud tasks.
+secrets:
+  build_proxy:
+    file: ${CAE_BUILD_PROXY:-/dev/null}
+  tls_ca:
+    file: ${CAE_TLS_CA:-/dev/null}
+  maven_settings:
+    file: ${CAE_MAVEN_SETTINGS:-/dev/null}
+  java_truststore:
+    file: ${CAE_JAVA_TRUSTSTORE:-/dev/null}

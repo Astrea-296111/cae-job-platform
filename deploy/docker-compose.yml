@@ -21,6 +21,8 @@ x-worker: &worker
     BACKEND_URL: http://backend:8080
     SERVICE_TOKEN: ${SERVICE_TOKEN:-demo-service-token}
     HEARTBEAT_INTERVAL_SECONDS: "5"
+    NO_PROXY: localhost,127.0.0.1,backend,worker-node-a,worker-node-b,worker-node-c
+    no_proxy: localhost,127.0.0.1,backend,worker-node-a,worker-node-b,worker-node-c
   volumes:
     - shared-data:/data
     - ../demo-data:/cases:ro
@@ -28,7 +30,7 @@ x-worker: &worker
     backend:
       condition: service_healthy
   healthcheck:
-    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:8000/health', timeout=3)"]
     interval: 10s
     timeout: 5s
     retries: 6
@@ -127,7 +129,7 @@ services:
       rabbitmq:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/actuator/health"]
+      test: ["CMD", "curl", "--noproxy", "*", "--fail", "--silent", "http://127.0.0.1:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -179,7 +181,7 @@ services:
       secrets: [build_proxy, tls_ca]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      test: ["CMD", "wget", "-Y", "off", "-q", "--spider", "http://127.0.0.1/"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -198,7 +200,7 @@ services:
       frontend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/health"]
+      test: ["CMD", "wget", "-Y", "off", "-q", "--spider", "http://127.0.0.1/health"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -213,11 +215,14 @@ services:
       - --storage.tsdb.retention.time=7d
     ports:
       - "127.0.0.1:9090:9090"
+    environment:
+      NO_PROXY: localhost,127.0.0.1,backend,prometheus
+      no_proxy: localhost,127.0.0.1,backend,prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:9090/-/healthy"]
+      test: ["CMD", "wget", "-Y", "off", "-q", "--spider", "http://127.0.0.1:9090/-/healthy"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -242,7 +247,7 @@ services:
       prometheus:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/health"]
+      test: ["CMD", "wget", "-Y", "off", "-q", "--spider", "http://127.0.0.1:3000/api/health"]
       interval: 10s
       timeout: 5s
       retries: 12

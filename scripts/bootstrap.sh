@@ -54,12 +54,17 @@ done
 chmod a+rx "$repo_root"
 bash "$repo_root/scripts/configure-cloud-build.sh"
 bash "$repo_root/scripts/mvn.sh" -f "$repo_root/backend/pom.xml" dependency:go-offline
-python3 -m venv "$repo_root/worker/.venv"
+worker_venv="$repo_root/worker/.venv"
+if [[ ! -x "$worker_venv/bin/python" && -x "$repo_root/.venv/bin/python" ]]; then
+  worker_venv="$repo_root/.venv"
+fi
+if [[ ! -x "$worker_venv/bin/python" ]]; then python3 -m venv "$worker_venv"; fi
 if [[ -n "${SSL_CERT_FILE:-}" && -z "${PIP_CERT:-}" ]]; then export PIP_CERT="$SSL_CERT_FILE"; fi
-"$repo_root/worker/.venv/bin/python" -m pip install -r "$repo_root/worker/requirements-dev.txt"
+"$worker_venv/bin/python" -m pip install -r "$repo_root/worker/requirements-dev.txt"
 if [[ ! -f "$repo_root/frontend/package-lock.json" ]]; then
   printf '%s\n' 'frontend/package-lock.json is required; run npm install once during development and commit the lockfile.' >&2
   exit 1
 fi
-npm --prefix "$repo_root/frontend" ci --no-audit --no-fund
+mkdir -p "$repo_root/.local/npm"
+npm --prefix "$repo_root/frontend" ci --cache "$repo_root/.local/npm" --no-audit --no-fund
 printf '%s\n' 'Development dependencies ready. Start all services with make up.'

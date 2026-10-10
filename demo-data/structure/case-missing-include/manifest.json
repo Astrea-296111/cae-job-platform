@@ -1,0 +1,23 @@
+{
+  "caseId": "STRUCTURE-CASE-MISSING-INCLUDE",
+  "entryDeck": "model.fem",
+  "includes": [
+    "missing_material.inc",
+    "properties.inc",
+    "loads.inc"
+  ],
+  "analysisType": "STRUCTURE",
+  "conditionCode": "BIW_TORSION",
+  "modelRevision": "V37",
+  "parameters": {
+    "seed": 51,
+    "thicknessScale": 1.0,
+    "subcase": 1
+  },
+  "checksums": {
+    "model.fem": "c205a1b340e22378715f953b364a299e06951144632ad84259a620996d292227",
+    "properties.inc": "209334a2d6d8814ed66d70415c7e2e513fb6c5adb6a454f2a368d16f83b065e0",
+    "loads.inc": "436de18f1d33d82410dfb9d90f862d459455cbd445cce09b4d1b46166b7fb119",
+    "metadata.json": "7debae6a6bd40add0f58b171c37cfede902b7c9035efd5af8769056ddef80387"
+  }
+}

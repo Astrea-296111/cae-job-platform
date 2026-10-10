@@ -18,6 +18,13 @@ Specification: `docs/reference/Codex提示词_CAE仿真任务调度结果管理�
 - Decisions: explicit parameterized SQL repositories (ADR-006); actual MySQL service integration tests rather than skipped container tests.
 
 ## Milestone 2
-- [ ] Case validation, safe includes, immutable input snapshot and failures.
+- [x] Case validation, bounded recursive INCLUDE checks, path/symlink safety, immutable input snapshots, SHA-256 integrity and explicit failures.
+- [x] Eight reproducible synthetic Case packages and authenticated Case catalog; live valid Case reaches READY and missing INCLUDE reaches VALIDATION_FAILED / INPUT_INCLUDE_MISSING.
+- Tests: Java 72 passed, including 30 snapshot safety tests and 4 real-MySQL validation tests; Python 2 passed; all format/lint/type/build checks pass. Updated backend image built and started healthy.
+- Known issues: none blocking M2. Docker vfs storage requires selective application builds and bounded removal of unused build caches; persistent volumes are preserved.
+- Decisions: validation freezes the exact checked input into a Job-owned workspace before execution; agents will verify the same checksum before starting a process.
+
+## Milestone 3
+- [ ] Durable node Agent execution and independent mock solver processes.
 - Tests: not yet run.
 - Known issues: none established.

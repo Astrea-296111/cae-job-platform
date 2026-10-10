@@ -1,0 +1,24 @@
+{
+  "caseId": "CRASH-CASE-001",
+  "entryDeck": "model.fem",
+  "includes": [
+    "materials.inc",
+    "properties.inc",
+    "loads.inc"
+  ],
+  "analysisType": "CRASH",
+  "conditionCode": "FRONTAL_CRASH",
+  "modelRevision": "P1",
+  "parameters": {
+    "seed": 71,
+    "thicknessScale": 1.0,
+    "subcase": 1
+  },
+  "checksums": {
+    "model.fem": "7bbced255a1be975e1d690b4726bc8582212557349f171ff4895f076f410af36",
+    "properties.inc": "209334a2d6d8814ed66d70415c7e2e513fb6c5adb6a454f2a368d16f83b065e0",
+    "loads.inc": "f8a0aa0871906c81d6642c63f3817c15b758d83309c2d321b19057518c40e3b9",
+    "metadata.json": "e9a2b2faa36d1a23a869c9e99a663667b0f253cf005d127800851bcbbcb6b63f",
+    "materials.inc": "f8a3d6eb0b04ae9478a186ac90ce5e30a31dc9df4847295d1467209d00767a42"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "caseId": "NVH-CASE-001",
+  "entryDeck": "model.fem",
+  "includes": [
+    "materials.inc",
+    "properties.inc",
+    "loads.inc"
+  ],
+  "analysisType": "NVH",
+  "conditionCode": "CABIN_NVH",
+  "modelRevision": "P1",
+  "parameters": {
+    "seed": 61,
+    "thicknessScale": 1.0,
+    "subcase": 1
+  },
+  "checksums": {
+    "model.fem": "7bbced255a1be975e1d690b4726bc8582212557349f171ff4895f076f410af36",
+    "properties.inc": "209334a2d6d8814ed66d70415c7e2e513fb6c5adb6a454f2a368d16f83b065e0",
+    "loads.inc": "da86936728502bd6f10067dff98e1ae1141c7f2a2dcd4bf8378b77add67cdacc",
+    "metadata.json": "efeb03a8c66b8d577a07fdd0633ac56a47feb0b355de11cd9e0441abf2c246c0",
+    "materials.inc": "f8a3d6eb0b04ae9478a186ac90ce5e30a31dc9df4847295d1467209d00767a42"
+  }
+}

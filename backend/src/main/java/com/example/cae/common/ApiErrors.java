@@ -55,6 +55,15 @@ public class ApiErrors {
         .body(body(error.code(), error.getMessage(), request, error.details()));
   }
 
+  @ExceptionHandler(PlatformFailure.class)
+  ResponseEntity<Map<String, Object>> failure(PlatformFailure error, HttpServletRequest request) {
+    Map<String, Object> result =
+        body(error.code().name(), error.getMessage(), request, error.details());
+    result.put("stage", error.stage());
+    result.put("retryable", error.code().retryable());
+    return ResponseEntity.unprocessableEntity().body(result);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   ResponseEntity<Map<String, Object>> validation(
       MethodArgumentNotValidException error, HttpServletRequest request) {

@@ -1,0 +1,4 @@
+$ SYNTHETIC INPUT: public workflow fixture, not a commercial solver deck
+INCLUDE 'missing_material.inc'
+INCLUDE 'properties.inc'
+INCLUDE 'loads.inc'

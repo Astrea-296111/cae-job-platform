@@ -1,0 +1,2 @@
+$ SYNTHETIC properties
+THICKNESS_SCALE 1.0

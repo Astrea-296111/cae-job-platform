@@ -56,9 +56,10 @@ done
 
 storage_driver=$(docker info --format '{{.Driver}}')
 guard_build_space() {
+  local threshold_mb=${1:-6144}
   local available_mb
   available_mb=$(df -Pk "$repo_root" | awk 'NR == 2 { print int($4 / 1024) }')
-  if [[ "$storage_driver" == vfs && "$available_mb" -lt 4096 ]]; then
+  if [[ "$storage_driver" == vfs && "$available_mb" -lt "$threshold_mb" ]]; then
     printf 'Docker vfs storage has %s MiB free; releasing unused build cache and dangling images.\n' "$available_mb"
     # Keep every container, named image and volume, including running Solver state.
     docker builder prune -af
@@ -69,11 +70,13 @@ guard_build_space() {
 built=false
 for application in backend worker frontend; do
   if [[ "${requested[$application]:-0}" == 1 ]]; then
-    guard_build_space
+    guard_build_space 6144
     service=$application
     if [[ "$application" == worker ]]; then service=worker-node-a; fi
     printf 'Building affected application image: %s\n' "$application"
     "${compose[@]}" build "$service"
+    # Free unused snapshots before container recreation if the build used the reserve.
+    guard_build_space 4096
     built=true
   fi
 done

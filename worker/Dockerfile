@@ -15,6 +15,9 @@ RUN --mount=type=secret,id=build_proxy \
     if [ -s /run/secrets/tls_ca ]; then export PIP_CERT=/run/secrets/tls_ca; fi; \
     pip install --no-cache-dir -r requirements.txt
 COPY app ./app
+COPY agents ./agents
+COPY adapters ./adapters
+COPY mock_solver ./mock_solver
 
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \

@@ -25,6 +25,13 @@ Specification: `docs/reference/Codex提示词_CAE仿真任务调度结果管理�
 - Decisions: validation freezes the exact checked input into a Job-owned workspace before execution; agents will verify the same checksum before starting a process.
 
 ## Milestone 3
-- [ ] Durable node Agent execution and independent mock solver processes.
+- [x] SQLite durable executionRequestId/fingerprint claims, independent mock Solver processes for all four disciplines, query/by-request and identity-safe cancellation.
+- [x] Snapshot verification, profile whitelist, local atomic capacity defense, authenticated five-second heartbeats and heartbeat failure control.
+- Tests: Java 105 passed; Python 32 passed; all format/lint/type/build checks pass. Backend and Worker images rebuilt; three Agents and backend started healthy. Live duplicate-submit, accepted-response-timeout/retry and running-cancel checks passed; all three actual heartbeats received. Evidence: `docs/validation/m3-agent-smoke.json`.
+- Known issues: none blocking M3. Backend scheduling and durable node/resource accounting belong to M4; the Agent-only smoke deliberately leaves backend Jobs READY.
+- Decisions: ADR-003 records the non-atomic SQLite-claim/process-launch window and conservative UNKNOWN handling; ADR-005 records shared filesystem boundaries. No exactly-once delivery claim.
+
+## Milestone 4
+- [ ] Persistent node registry, scheduling, license/resource reservation and submission orchestration.
 - Tests: not yet run.
 - Known issues: none established.

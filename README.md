@@ -3,7 +3,7 @@
 Public reproduction of a CAE job control plane and result/report pipeline.
 Synthetic cases and mock solver processes only; no commercial solver, enterprise data or license is required.
 
-Milestones 0–2 are validated: all Compose services start; MySQL Job APIs, state/event CAS, role checks, safe Case validation and immutable input snapshots work. Solver and report pipeline are under implementation. See [progress](docs/progress.md).
+Milestones 0–3 are validated: all Compose services start; MySQL Job APIs, state/event CAS, role checks, safe Case validation and immutable input snapshots work. Agents run independent mock Solver processes with durable idempotency, query, cancellation and heartbeats. Backend scheduling and the report pipeline are under implementation. See [progress](docs/progress.md).
 
 ## Development
 

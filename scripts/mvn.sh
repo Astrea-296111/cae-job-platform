@@ -35,12 +35,14 @@ if [[ -n "${HTTPS_PROXY:-${https_proxy:-}}" ]]; then
   settings_file=$(mktemp /tmp/cae-maven-settings.XXXXXX.xml)
   CAE_MAVEN_SETTINGS_PATH="$settings_file" python3 - <<'PY'
 import os
-from urllib.parse import unquote, urlsplit
+from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
 
 url = urlsplit(os.environ.get("HTTPS_PROXY") or os.environ["https_proxy"])
 if not url.hostname:
     raise SystemExit("HTTPS_PROXY must contain a valid proxy URL")
+if url.username or url.password:
+    raise SystemExit("Authenticated proxy URLs are unsupported by this helper; use externally managed Maven settings instead")
 root = ET.Element("settings")
 proxy = ET.SubElement(ET.SubElement(root, "proxies"), "proxy")
 values = {
@@ -48,10 +50,6 @@ values = {
     "host": url.hostname, "port": str(url.port or 8080),
     "nonProxyHosts": "localhost|127.0.0.1|mysql|redis|rabbitmq|backend|worker-node-*",
 }
-if url.username:
-    values["username"] = unquote(url.username)
-if url.password:
-    values["password"] = unquote(url.password)
 for key, value in values.items():
     ET.SubElement(proxy, key).text = value
 ET.ElementTree(root).write(os.environ["CAE_MAVEN_SETTINGS_PATH"], encoding="unicode")

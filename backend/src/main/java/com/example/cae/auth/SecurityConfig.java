@@ -1,8 +1,8 @@
 package com.example.cae.auth;
 
+import com.example.cae.common.ApiErrors;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
   @Bean
-  SecurityFilterChain security(HttpSecurity http) throws Exception {
+  SecurityFilterChain security(HttpSecurity http, ApiErrors errors) throws Exception {
     return http.csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(
             a ->
@@ -20,7 +20,21 @@ public class SecurityConfig {
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-        .httpBasic(Customizer.withDefaults())
+        .httpBasic(
+            basic ->
+                basic.authenticationEntryPoint(
+                    (request, response, error) ->
+                        errors.write(
+                            request,
+                            response,
+                            401,
+                            "UNAUTHENTICATED",
+                            "Authentication is required")))
+        .exceptionHandling(
+            exceptions ->
+                exceptions.accessDeniedHandler(
+                    (request, response, error) ->
+                        errors.write(request, response, 403, "FORBIDDEN", "Access is denied")))
         .build();
   }
 

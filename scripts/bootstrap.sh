@@ -49,7 +49,11 @@ if [[ "${1:-}" == --toolchain-only ]]; then
 fi
 
 for public_dir in "$repo_root/deploy" "$repo_root/demo-data"; do
-  if [[ -d "$public_dir" ]]; then chmod -R a+rX "$public_dir"; fi
+  if [[ -d "$public_dir" ]]; then
+    find "$public_dir" \( -name ".env" -o -name ".env.*" -o -name ".local" \) -prune \
+      -o -type d -exec chmod a+rx {} + \
+      -o -type f -exec chmod a+rX {} +
+  fi
 done
 chmod a+rx "$repo_root"
 bash "$repo_root/scripts/configure-cloud-build.sh"

@@ -1,5 +1,19 @@
 server:
   port: 8080
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/cae?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC}
+    username: ${DB_USER:cae}
+    password: ${DB_PASSWORD:demo-cae-password}
+    hikari:
+      maximum-pool-size: 16
+  flyway:
+    enabled: true
+  jackson:
+    time-zone: UTC
+  sql:
+    init:
+      mode: never
 management:
   endpoints:
     web:

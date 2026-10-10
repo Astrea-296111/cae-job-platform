@@ -8,7 +8,7 @@ python3 - <<'PY'
 import os
 from pathlib import Path
 import socket
-from urllib.parse import unquote, urlsplit
+from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
 
 root = Path(os.environ['CAE_REPO_ROOT'])
@@ -19,6 +19,8 @@ if not proxy_url:
 proxy = urlsplit(proxy_url)
 if not proxy.hostname:
     raise SystemExit('HTTPS_PROXY must be a valid proxy URL')
+if proxy.username or proxy.password:
+    raise SystemExit('Authenticated proxy URLs are not persisted by this helper; supply externally managed BuildKit secrets instead.')
 proxy_ip = socket.gethostbyname(proxy.hostname)
 local = root / '.local' / 'cloud-build'
 local.mkdir(parents=True, exist_ok=True)
@@ -30,10 +32,6 @@ element = ET.SubElement(ET.SubElement(settings, 'proxies'), 'proxy')
 values = {'id': 'cloud-egress', 'active': 'true', 'protocol': 'http',
           'host': proxy.hostname, 'port': str(proxy.port or 8080),
           'nonProxyHosts': 'localhost|127.0.0.1'}
-if proxy.username:
-    values['username'] = unquote(proxy.username)
-if proxy.password:
-    values['password'] = unquote(proxy.password)
 for key, value in values.items():
     ET.SubElement(element, key).text = value
 settings_file = local / 'maven-settings.xml'
@@ -51,27 +49,31 @@ if Path(ca_path).is_file():
 java_path = '/etc/ssl/certs/java/cacerts'
 if Path(java_path).is_file():
     config['CAE_JAVA_TRUSTSTORE'] = java_path
-env = root / '.env'
-existing = env.read_text() if env.exists() else ''
-begin = '# BEGIN CAE MANAGED CLOUD BUILD'
-end = '# END CAE MANAGED CLOUD BUILD'
-# Refresh only the block owned by this script; preserve all user configuration.
-lines = []
-in_managed = False
-for line in existing.splitlines():
-    if line == begin:
-        in_managed = True
-    elif line == end:
-        in_managed = False
-    elif not in_managed:
-        lines.append(line)
-known = {line.split('=', 1)[0] for line in lines if '=' in line and not line.startswith('#')}
-managed = [f'{key}={value}' for key, value in config.items() if key not in known]
-if managed:
-    if lines and lines[-1]:
-        lines.append('')
-    lines.extend([begin, *managed, end])
-env.write_text('\n'.join(lines) + '\n')
-env.chmod(0o600)
+def refresh_env(env):
+    existing = env.read_text() if env.exists() else ''
+    begin = '# BEGIN CAE MANAGED CLOUD BUILD'
+    end = '# END CAE MANAGED CLOUD BUILD'
+    # Refresh only the block owned by this script; preserve all user configuration.
+    lines = []
+    in_managed = False
+    for line in existing.splitlines():
+        if line == begin:
+            in_managed = True
+        elif line == end:
+            in_managed = False
+        elif not in_managed:
+            lines.append(line)
+    known = {line.split('=', 1)[0] for line in lines if '=' in line and not line.startswith('#')}
+    managed = [f'{key}={value}' for key, value in config.items() if key not in known]
+    if managed:
+        if lines and lines[-1]:
+            lines.append('')
+        lines.extend([begin, *managed, end])
+    env.write_text('\n'.join(lines) + '\n')
+    env.chmod(0o600)
+
+# Support both root `docker compose` and the documented `-f deploy/...` command.
+refresh_env(root / '.env')
+refresh_env(root / 'deploy' / '.env')
 print('Local cloud-build configuration ready; TLS verification remains enabled.')
 PY

@@ -3,7 +3,7 @@
 Public reproduction of a CAE job control plane and result/report pipeline.
 Synthetic cases and mock solver processes only; no commercial solver, enterprise data or license is required.
 
-Milestone 0 is validated: Java/Python/Vue bootstrap and all Compose services start. Business functionality is under implementation. See [progress](docs/progress.md).
+Milestone 0 is validated: Java/Python/Vue bootstrap and all Compose services start. MySQL Job CRUD, project/model/revision APIs, state/event CAS and role checks are validated through Milestone 1. Solver and report pipeline are under implementation. See [progress](docs/progress.md).
 
 ## Development
 

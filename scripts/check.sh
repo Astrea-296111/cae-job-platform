@@ -61,12 +61,24 @@ guard_build_space() {
   available_mb=$(df -Pk "$repo_root" | awk 'NR == 2 { print int($4 / 1024) }')
   if [[ "$storage_driver" == vfs && "$available_mb" -lt "$threshold_mb" ]]; then
     printf 'Docker vfs storage has %s MiB free; releasing unused build cache and dangling images.\n' "$available_mb"
-    # Keep every container, named image and volume, including running Solver state.
+    # Keep every container, runtime image and volume, including running Solver state.
     docker builder prune -af
     docker image prune -f
     available_mb=$(df -Pk "$repo_root" | awk 'NR == 2 { print int($4 / 1024) }')
+    # Bootstrap extracts Java/Maven into the workspace. Its pinned, unused
+    # extraction image otherwise duplicates the JDK filesystem under vfs.
+    # Docker builds can fetch this public build image again; no runtime image
+    # or container is removed by this narrowly scoped fallback.
+    local extraction_image=maven:3.9.9-eclipse-temurin-17
+    if [[ "$available_mb" -lt "$threshold_mb" ]] \
+        && docker image inspect "$extraction_image" >/dev/null 2>&1 \
+        && [[ -z "$(docker ps -aq --filter "ancestor=$extraction_image")" ]]; then
+      printf 'Releasing unused bootstrap toolchain image: %s\n' "$extraction_image"
+      docker image rm "$extraction_image"
+      available_mb=$(df -Pk "$repo_root" | awk 'NR == 2 { print int($4 / 1024) }')
+    fi
     if [[ "$available_mb" -lt "$threshold_mb" ]]; then
-      printf 'Docker vfs still has %s MiB free; %s MiB is required before continuing. Existing containers, named images and volumes were retained.\n' "$available_mb" "$threshold_mb" >&2
+      printf 'Docker vfs still has %s MiB free; %s MiB is required before continuing. Existing containers, runtime images and volumes were retained.\n' "$available_mb" "$threshold_mb" >&2
       return 1
     fi
   fi

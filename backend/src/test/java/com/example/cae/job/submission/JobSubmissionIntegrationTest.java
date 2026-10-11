@@ -58,8 +58,10 @@ class JobSubmissionIntegrationTest {
     registry.add("CASE_ROOT", () -> ROOT.resolve("cases").toString());
     registry.add("DATA_ROOT", () -> ROOT.resolve("data").toString());
     registry.add("WORKER_URLS", () -> "node-a=" + AGENT.origin());
-    registry.add("cae.agent.request-timeout-ms", () -> 400);
+    // Hold/release latches control races; leave enough transport budget to persist cancel intent.
+    registry.add("cae.agent.request-timeout-ms", () -> 2000);
     registry.add("cae.background.enabled", () -> false);
+    registry.add("cae.mq.listeners-enabled", () -> false);
   }
 
   @Autowired MockMvc mvc;
@@ -68,6 +70,8 @@ class JobSubmissionIntegrationTest {
   @Autowired JobRepository jobs;
   @Autowired ExecutionRepository executions;
   @Autowired JobSubmissionService submission;
+  @Autowired JobAllocationService allocation;
+  @Autowired ExecutionDispatchService dispatch;
   @Autowired JobCommandService commands;
   @Autowired JobCancellationService cancellation;
   @Autowired ResourceReservationService resources;
@@ -162,6 +166,9 @@ class JobSubmissionIntegrationTest {
     assertThat(execution.get("submitRequestId"))
         .isEqualTo(AGENT.accepted.keySet().iterator().next());
     assertThat(reservationStatus(execution)).isEqualTo("IN_USE");
+    int attempts = AGENT.submitAttempts.get();
+    assertThat(dispatch.submit(SqlRows.id(execution))).isEqualTo(DispatchOutcome.NOOP);
+    assertThat(AGENT.submitAttempts.get()).isEqualTo(attempts);
   }
 
   @Test
@@ -189,7 +196,8 @@ class JobSubmissionIntegrationTest {
     Map<String, Object> job = readyJob();
     command(job, "submit", "engineer", Map.of("idempotencyKey", "timeout-submit"), 202);
 
-    submission.execute(SqlRows.id(job));
+    long executionId = allocation.allocate(SqlRows.id(job)).orElseThrow();
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.RETRYABLE_UNCERTAIN);
     Map<String, Object> first = currentExecution(job);
     assertThat(jobs.findById(SqlRows.id(job)))
         .containsEntry("status", "SUBMITTING")
@@ -199,7 +207,7 @@ class JobSubmissionIntegrationTest {
     assertThat(AGENT.accepted).containsKey(first.get("submitRequestId").toString());
     AGENT.releaseResponse.countDown();
 
-    submission.execute(SqlRows.id(job));
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.ACCEPTED);
     Map<String, Object> retried = currentExecution(job);
     assertThat(SqlRows.id(retried)).isEqualTo(SqlRows.id(first));
     assertThat(retried.get("submitRequestId")).isEqualTo(first.get("submitRequestId"));
@@ -216,20 +224,76 @@ class JobSubmissionIntegrationTest {
   void ambiguousServerFailureKeepsCapacityAndCannotCreateANewAttempt() throws Exception {
     AGENT.mode = Mode.ERROR_AFTER_ACCEPT;
     Map<String, Object> job = readyJob();
+    int cpuBefore =
+        jdbc.queryForObject(
+            "SELECT cpu_reserved FROM cae_compute_node WHERE node_id='node-a'", Integer.class);
+    int memoryBefore =
+        jdbc.queryForObject(
+            "SELECT memory_reserved_gb FROM cae_compute_node WHERE node_id='node-a'",
+            Integer.class);
+    int licensesBefore =
+        jdbc.queryForObject(
+            "SELECT reserved_tokens FROM cae_license_pool WHERE feature='OPTISTRUCT'",
+            Integer.class);
     command(job, "submit", "engineer", Map.of("idempotencyKey", "uncertain"), 202);
-    submission.execute(SqlRows.id(job));
+    long executionId = allocation.allocate(SqlRows.id(job)).orElseThrow();
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.RETRYABLE_UNCERTAIN);
     Map<String, Object> first = currentExecution(job);
     assertThat(jobs.findById(SqlRows.id(job)))
         .containsEntry("status", "SUBMITTING")
         .containsEntry("failureCode", "UNKNOWN_REMOTE_STATE");
     assertThat(reservationStatus(first)).isEqualTo("RESERVED");
     command(job, "retry", "engineer", Map.of("idempotencyKey", "repeat-uncertain"), 202);
-    submission.execute(SqlRows.id(job));
+    assertThat(allocation.allocate(SqlRows.id(job))).contains(executionId);
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.RETRYABLE_UNCERTAIN);
     assertThat(executions.history(SqlRows.id(job))).hasSize(1);
     assertThat(currentExecution(job).get("submitRequestId"))
         .isEqualTo(first.get("submitRequestId"));
     assertThat(reservationStatus(first)).isEqualTo("RESERVED");
     assertThat(AGENT.accepted).hasSize(1);
+
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.RETRYABLE_UNCERTAIN);
+    String logicalEventId = "submit-" + UUID.randomUUID();
+    dispatch.deliveryExhausted(
+        executionId, logicalEventId, 3, "Three uncertain submit deliveries exhausted");
+    Map<String, Object> exhausted = currentExecution(job);
+    assertThat(jobs.findById(SqlRows.id(job)))
+        .containsEntry("status", "UNKNOWN")
+        .containsEntry("currentExecutionId", executionId)
+        .containsEntry("failureCode", "UNKNOWN_REMOTE_STATE");
+    assertThat(exhausted)
+        .containsEntry("status", "UNKNOWN")
+        .containsEntry("submitRequestId", first.get("submitRequestId"))
+        .containsEntry("request", first.get("request"));
+    assertThat(SqlRows.id(exhausted)).isEqualTo(executionId);
+    assertThat(executions.history(SqlRows.id(job))).hasSize(1);
+    assertThat(reservationStatus(exhausted)).isEqualTo("RESERVED");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT cpu_reserved FROM cae_compute_node WHERE node_id='node-a'", Integer.class))
+        .isEqualTo(cpuBefore + 4);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT memory_reserved_gb FROM cae_compute_node WHERE node_id='node-a'",
+                Integer.class))
+        .isEqualTo(memoryBefore + 8);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT reserved_tokens FROM cae_license_pool WHERE feature='OPTISTRUCT'",
+                Integer.class))
+        .isEqualTo(licensesBefore + 1);
+    assertThat(jobs.events(SqlRows.id(job)).stream().map(event -> event.get("eventType")))
+        .filteredOn("SUBMIT_DELIVERY_EXHAUSTED"::equals)
+        .hasSize(1);
+    Object version = jobs.findById(SqlRows.id(job)).get("version");
+    int events = jobs.events(SqlRows.id(job)).size();
+    dispatch.deliveryExhausted(executionId, logicalEventId, 3, "Repeated exhaustion notification");
+    assertThat(jobs.findById(SqlRows.id(job)).get("version")).isEqualTo(version);
+    assertThat(currentExecution(job).get("version")).isEqualTo(exhausted.get("version"));
+    assertThat(jobs.events(SqlRows.id(job))).hasSize(events);
+    assertThat(allocation.allocate(SqlRows.id(job))).isEmpty();
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.NOOP);
+    assertThat(AGENT.submitAttempts.get()).isEqualTo(3);
   }
 
   @Test
@@ -237,7 +301,8 @@ class JobSubmissionIntegrationTest {
     AGENT.mode = Mode.REJECT;
     Map<String, Object> job = readyJob();
     command(job, "submit", "engineer", Map.of("idempotencyKey", "rejected"), 202);
-    submission.execute(SqlRows.id(job));
+    long executionId = allocation.allocate(SqlRows.id(job)).orElseThrow();
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.PERMANENT_FAILURE);
     Map<String, Object> execution = currentExecution(job);
     assertThat(jobs.findById(SqlRows.id(job)))
         .containsEntry("status", "SUBMIT_FAILED")
@@ -245,6 +310,8 @@ class JobSubmissionIntegrationTest {
     assertThat(execution.get("status")).isEqualTo("SUBMIT_FAILED");
     assertThat(reservationStatus(execution)).isEqualTo("RELEASED");
     assertThat(AGENT.accepted).isEmpty();
+    assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.NOOP);
+    assertThat(AGENT.submitAttempts.get()).isEqualTo(1);
   }
 
   @Test
@@ -304,6 +371,41 @@ class JobSubmissionIntegrationTest {
       assertThat(execution.get("status")).isEqualTo("CANCELLED");
       assertThat(reservationStatus(execution)).isEqualTo("RELEASED");
       assertThat(AGENT.accepted).hasSize(1);
+      assertThat(executions.history(SqlRows.id(job))).hasSize(1);
+    } finally {
+      AGENT.releaseResponse.countDown();
+      caller.shutdownNow();
+    }
+  }
+
+  @Test
+  void confirmedAcceptanceRemainsAcceptedWhenTheRacingCancellationRpcReturns503() throws Exception {
+    AGENT.mode = Mode.TIMEOUT_FIRST;
+    AGENT.cancelUnavailable = true;
+    Map<String, Object> job = readyJob();
+    command(
+        job, "submit", "engineer", Map.of("idempotencyKey", "accepted-cancel-unavailable"), 202);
+    long executionId = allocation.allocate(SqlRows.id(job)).orElseThrow();
+    ExecutorService caller = Executors.newSingleThreadExecutor();
+    try {
+      var outcome = caller.submit(() -> dispatch.submit(executionId));
+      assertThat(AGENT.firstAccepted.await(2, TimeUnit.SECONDS)).isTrue();
+      command(job, "cancel", "engineer", Map.of(), 200);
+      AGENT.releaseResponse.countDown();
+      assertThat(outcome.get(5, TimeUnit.SECONDS))
+          .isIn(DispatchOutcome.ACCEPTED, DispatchOutcome.NOOP);
+      Map<String, Object> execution = currentExecution(job);
+      assertThat(execution).containsEntry("status", "SUBMITTED");
+      assertThat(execution.get("externalExecutionId"))
+          .isEqualTo(AGENT.accepted.get(execution.get("submitRequestId")));
+      assertThat(execution.get("cancelRequested")).isIn(true, 1);
+      assertThat(jobs.findById(SqlRows.id(job)))
+          .containsEntry("status", "CANCEL_REQUESTED")
+          .containsEntry("failureCode", "CANCEL_FAILED");
+      assertThat(reservationStatus(execution)).isEqualTo("IN_USE");
+      assertThat(AGENT.cancelAttempts.get()).isEqualTo(2);
+      assertThat(dispatch.submit(executionId)).isEqualTo(DispatchOutcome.NOOP);
+      assertThat(AGENT.submitAttempts.get()).isEqualTo(1);
       assertThat(executions.history(SqlRows.id(job))).hasSize(1);
     } finally {
       AGENT.releaseResponse.countDown();
@@ -479,6 +581,7 @@ class JobSubmissionIntegrationTest {
     private final ExecutorService threads = Executors.newCachedThreadPool();
     private final Map<String, String> accepted = new ConcurrentHashMap<>();
     private final AtomicInteger submitAttempts = new AtomicInteger();
+    private final AtomicInteger cancelAttempts = new AtomicInteger();
     private volatile Mode mode = Mode.ACCEPT;
     private volatile CountDownLatch releaseResponse = new CountDownLatch(1);
     private volatile CountDownLatch firstAccepted = new CountDownLatch(1);
@@ -503,6 +606,7 @@ class JobSubmissionIntegrationTest {
     void reset() {
       accepted.clear();
       submitAttempts.set(0);
+      cancelAttempts.set(0);
       mode = Mode.ACCEPT;
       releaseResponse = new CountDownLatch(1);
       firstAccepted = new CountDownLatch(1);
@@ -546,6 +650,7 @@ class JobSubmissionIntegrationTest {
 
     private void queryOrCancel(HttpExchange exchange) throws IOException {
       String path = exchange.getRequestURI().getPath();
+      if (path.endsWith("/cancel")) cancelAttempts.incrementAndGet();
       if (path.startsWith("/worker/v1/jobs/by-request/")) {
         String requestId = path.substring("/worker/v1/jobs/by-request/".length());
         String external = accepted.get(requestId);

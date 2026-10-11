@@ -41,9 +41,9 @@ public class ExecutionDispatchService {
   /**
    * Retrying transport always reuses the durable attempt request, never a fresh process identity.
    */
-  public void submit(long executionId) {
+  public DispatchOutcome submit(long executionId) {
     Map<String, Object> execution = executions.find(executionId);
-    if (!"SUBMITTING".equals(execution.get("status"))) return;
+    if (!"SUBMITTING".equals(execution.get("status"))) return DispatchOutcome.NOOP;
     Map<String, Object> request = (Map<String, Object>) execution.get("request");
     LOG.info(
         "Agent submit jobNo={} executionId={} executionRequestId={} nodeId={}",
@@ -53,55 +53,69 @@ public class ExecutionDispatchService {
         execution.get("nodeId"));
     try {
       Map<String, Object> accepted = agents.submit(execution.get("nodeId").toString(), request);
-      tx.executeWithoutResult(
-          status -> {
-            Map<String, Object> job = jobs.lockById(((Number) execution.get("jobId")).longValue());
-            Map<String, Object> current = executions.locked(executionId);
-            if (!"SUBMITTING".equals(current.get("status"))) return;
-            Timestamp now = Timestamp.from(Instant.now());
-            boolean unknown = "UNKNOWN".equals(accepted.get("state"));
-            current =
-                executions.patch(
-                    current,
-                    Map.of(
-                        "externalExecutionId",
-                        accepted.get("externalExecutionId"),
-                        "status",
-                        unknown ? "UNKNOWN" : "SUBMITTED",
-                        "submittedAt",
-                        now));
-            resources.accepted(((Number) current.get("reservationId")).longValue());
-            if ("SUBMITTING".equals(job.get("status"))) {
-              Map<String, Object> fields = new LinkedHashMap<>();
-              fields.put("submittedAt", now);
-              fields.put("failureCode", null);
-              fields.put("failureMessage", null);
-              job = jobs.patch(job, fields);
-              jobs.transition(
-                  job,
-                  unknown ? JobStatus.UNKNOWN : JobStatus.SUBMITTED,
-                  "AGENT_ACCEPTED",
-                  Map.of(
-                      "executionId",
-                      executionId,
-                      "externalExecutionId",
-                      accepted.get("externalExecutionId"),
-                      "remoteState",
-                      accepted.get("state")));
-            }
-          });
+      DispatchOutcome outcome =
+          tx.execute(
+              status -> {
+                Map<String, Object> job =
+                    jobs.lockById(((Number) execution.get("jobId")).longValue());
+                Map<String, Object> current = executions.locked(executionId);
+                if (!"SUBMITTING".equals(current.get("status"))) return DispatchOutcome.NOOP;
+                Timestamp now = Timestamp.from(Instant.now());
+                boolean unknown = "UNKNOWN".equals(accepted.get("state"));
+                current =
+                    executions.patch(
+                        current,
+                        Map.of(
+                            "externalExecutionId",
+                            accepted.get("externalExecutionId"),
+                            "status",
+                            unknown ? "UNKNOWN" : "SUBMITTED",
+                            "submittedAt",
+                            now));
+                resources.accepted(((Number) current.get("reservationId")).longValue());
+                if ("SUBMITTING".equals(job.get("status"))) {
+                  Map<String, Object> fields = new LinkedHashMap<>();
+                  fields.put("submittedAt", now);
+                  fields.put("failureCode", null);
+                  fields.put("failureMessage", null);
+                  job = jobs.patch(job, fields);
+                  jobs.transition(
+                      job,
+                      unknown ? JobStatus.UNKNOWN : JobStatus.SUBMITTED,
+                      "AGENT_ACCEPTED",
+                      Map.of(
+                          "executionId",
+                          executionId,
+                          "externalExecutionId",
+                          accepted.get("externalExecutionId"),
+                          "remoteState",
+                          accepted.get("state")));
+                }
+                return DispatchOutcome.ACCEPTED;
+              });
       // A cancellation may have won while the HTTP acceptance was in flight.
       Map<String, Object> latest = executions.find(executionId);
-      if (Boolean.TRUE.equals(latest.get("cancelRequested"))
-          || Integer.valueOf(1).equals(latest.get("cancelRequested")))
-        agents.cancel(
-            latest.get("nodeId").toString(), latest.get("externalExecutionId").toString());
+      if ((Boolean.TRUE.equals(latest.get("cancelRequested"))
+              || Integer.valueOf(1).equals(latest.get("cancelRequested")))
+          && latest.get("externalExecutionId") != null) {
+        try {
+          agents.cancel(
+              latest.get("nodeId").toString(), latest.get("externalExecutionId").toString());
+        } catch (AgentException cancellationFailure) {
+          // Acceptance is durable. The cancellation loop resumes this separate intent.
+          LOG.warn(
+              "Cancellation after acceptance deferred executionId={} failureCode={}",
+              executionId,
+              cancellationFailure.code());
+        }
+      }
+      return outcome;
     } catch (AgentException failure) {
-      tx.executeWithoutResult(
+      return tx.execute(
           status -> {
             Map<String, Object> job = jobs.lockById(((Number) execution.get("jobId")).longValue());
             Map<String, Object> current = executions.locked(executionId);
-            if (!"SUBMITTING".equals(current.get("status"))) return;
+            if (!"SUBMITTING".equals(current.get("status"))) return DispatchOutcome.NOOP;
             job =
                 jobs.patch(
                     job,
@@ -121,7 +135,7 @@ public class ExecutionDispatchService {
                       failure.code().name(),
                       "retryable",
                       true));
-              return;
+              return DispatchOutcome.RETRYABLE_UNCERTAIN;
             }
             executions.patch(
                 current,
@@ -148,7 +162,60 @@ public class ExecutionDispatchService {
                       failure.httpStatus(),
                       "failureCode",
                       failure.code().name()));
+            return DispatchOutcome.PERMANENT_FAILURE;
           });
     }
+  }
+
+  /** Delivery exhaustion cannot establish that the remote process never started. */
+  public void deliveryExhausted(
+      long executionId, String logicalEventId, int attempts, String reason) {
+    String boundedReason =
+        reason == null
+            ? "Submit delivery retries exhausted"
+            : reason.substring(0, Math.min(800, reason.length()));
+    Map<String, Object> execution = executions.find(executionId);
+    tx.executeWithoutResult(
+        status -> {
+          Map<String, Object> job = jobs.lockById(((Number) execution.get("jobId")).longValue());
+          Map<String, Object> current = executions.locked(executionId);
+          if (!"SUBMITTING".equals(current.get("status"))
+              || !Long.valueOf(executionId)
+                  .equals(job.get("currentExecutionId") instanceof Number n ? n.longValue() : null))
+            return;
+          executions.patch(current, Map.of("status", "UNKNOWN", "rawMessage", boundedReason));
+          job =
+              jobs.patch(
+                  job,
+                  Map.of("failureCode", "UNKNOWN_REMOTE_STATE", "failureMessage", boundedReason));
+          if ("SUBMITTING".equals(job.get("status")))
+            job =
+                jobs.transition(
+                    job,
+                    JobStatus.UNKNOWN,
+                    "SUBMIT_DELIVERY_EXHAUSTED",
+                    Map.of(
+                        "executionId",
+                        executionId,
+                        "logicalEventId",
+                        logicalEventId,
+                        "attempts",
+                        attempts,
+                        "resourcesRetained",
+                        true));
+          else
+            jobs.recordEvent(
+                SqlRows.id(job),
+                "SUBMIT_DELIVERY_EXHAUSTED",
+                Map.of(
+                    "executionId",
+                    executionId,
+                    "logicalEventId",
+                    logicalEventId,
+                    "attempts",
+                    attempts,
+                    "resourcesRetained",
+                    true));
+        });
   }
 }

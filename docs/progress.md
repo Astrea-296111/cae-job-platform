@@ -39,6 +39,13 @@ Specification: `docs/reference/Codex提示词_CAE仿真任务调度结果管理�
 - Decisions: ADR-007 specifies MySQL as admission truth and Job → license → node → reservation locking. Image builds retain a measured 6 GiB reserve for Java and 4 GiB for the smaller Worker/frontend builds under Docker vfs; only unused caches/dangling images are pruned.
 
 ## Milestone 5
-- [ ] RabbitMQ durable commands, transactional Outbox, publisher confirms, manual ACK, Inbox idempotency and bounded retries/DLQ.
+- [x] MySQL transactional Outbox, leased SKIP LOCKED publisher, correlated confirm/mandatory-return validation, persistent RabbitMQ queues and manual ACK.
+- [x] Inbox logical-event leases/deduplication, delayed same-execution retries, bounded business delivery/DLQ and conservative UNKNOWN on uncertain exhaustion. Parse/post/report queues are declared without placeholder consumers.
+- Tests: Java 163 passed, including 10 new real-MySQL/Rabbit integration tests and the acceptance/cancel-failure regression; Python 36 passed; all format/lint/type/build checks pass. Backend image rebuilt and deployed healthy. Real broker smoke proves eight duplicate commands produce one execution/PID, Inbox DONE and broker ACK while Solver runs (1.15s command-to-DONE in this demo), a real accepted-response timeout retries the same immutable request/PID, and an invalid version enters the actual DLQ with broker x-death metadata. Owned smoke reservations return to their prior baseline. Evidence: `docs/validation/m5-messaging-smoke.json`.
+- Known issues: none blocking M5. The first gate exposed concurrent INSERT IGNORE lock-upgrade deadlock; fixed with a no-op upsert taking the exclusive row lock directly. Database outages retain unacked deliveries with capped recovery backoff. M6 will monitor normal execution completion and backfill the M5 smoke's confirmed SUCCESS attempts into the parser queue.
+- Decisions: ADR-004 documents at-least-once delivery plus idempotent business handling, not exactly-once. Tests own separate MySQL/Redis/Rabbit namespaces. Docker vfs fallback may remove only the unused pinned bootstrap Maven extraction image after checking no container uses it; all application/runtime images, containers and volumes are preserved.
+
+## Milestone 6
+- [ ] Execution poll leases, authenticated callbacks, UNKNOWN/offline reconciliation and backend restart recovery.
 - Tests: not yet run.
 - Known issues: none established.

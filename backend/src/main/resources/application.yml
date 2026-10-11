@@ -1,6 +1,23 @@
 server:
   port: 8080
 spring:
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:127.0.0.1}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    connection-timeout: 3s
+    username: ${SPRING_RABBITMQ_USERNAME:cae}
+    password: ${SPRING_RABBITMQ_PASSWORD:demo-cae-password}
+    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:${RABBITMQ_VHOST:/}}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 8
+        concurrency: 2
+        max-concurrency: 4
   data:
     redis:
       host: ${REDIS_HOST:127.0.0.1}
@@ -25,6 +42,8 @@ management:
       exposure:
         include: health,prometheus
 cae:
+  mq:
+    listeners-enabled: ${CAE_MQ_LISTENERS_ENABLED:true}
   background:
     enabled: ${CAE_BACKGROUND_ENABLED:true}
   nodes:

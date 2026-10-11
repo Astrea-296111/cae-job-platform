@@ -14,13 +14,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/** M4 direct dispatch; M5 replaces remote submissions with durable queue commands. */
+/** Re-scan durable waiting work; RabbitMQ commands own remote submission delivery. */
 @Component
 public class SubmissionLoop {
   private static final Logger LOG = LoggerFactory.getLogger(SubmissionLoop.class);
   private final JobRepository jobs;
   private final JobCommandService commands;
-  private final JobSubmissionService submission;
+  private final JobAllocationService allocation;
   private final JobCancellationService cancellation;
   private final boolean enabled;
   private final Set<Long> inFlight = ConcurrentHashMap.newKeySet();
@@ -29,12 +29,12 @@ public class SubmissionLoop {
   public SubmissionLoop(
       JobRepository jobs,
       JobCommandService commands,
-      JobSubmissionService submission,
+      JobAllocationService allocation,
       JobCancellationService cancellation,
       @Value("${cae.background.enabled:true}") boolean enabled) {
     this.jobs = jobs;
     this.commands = commands;
-    this.submission = submission;
+    this.allocation = allocation;
     this.cancellation = cancellation;
     this.enabled = enabled;
   }
@@ -44,11 +44,7 @@ public class SubmissionLoop {
     if (!enabled) return;
     commands.pendingValidation().stream().limit(8).forEach(this::dispatch);
     jobs
-        .listByStatus(
-            JobStatus.QUEUED,
-            JobStatus.WAITING_RESOURCE,
-            JobStatus.SUBMITTING,
-            JobStatus.CANCEL_REQUESTED)
+        .listByStatus(JobStatus.QUEUED, JobStatus.WAITING_RESOURCE, JobStatus.CANCEL_REQUESTED)
         .stream()
         .limit(12)
         .forEach(job -> dispatch(SqlRows.id(job)));
@@ -61,7 +57,10 @@ public class SubmissionLoop {
           try {
             if ("CANCEL_REQUESTED".equals(jobs.findById(id).get("status")))
               cancellation.continueCancel(id);
-            else submission.execute(id);
+            else {
+              if (commands.pendingValidation().contains(id)) commands.finishValidation(id);
+              allocation.allocate(id);
+            }
           } catch (RuntimeException e) {
             LOG.warn(
                 "Deferred Job orchestration jobId={} cause={}", id, e.getClass().getSimpleName());

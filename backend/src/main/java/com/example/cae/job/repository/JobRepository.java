@@ -6,6 +6,7 @@ import com.example.cae.common.SqlRows;
 import com.example.cae.job.domain.CaeJob;
 import com.example.cae.job.domain.JobStatus;
 import com.example.cae.job.domain.JobTransitionPolicy;
+import com.example.cae.outbox.OutboxRepository;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -27,6 +28,7 @@ public class JobRepository {
   private final JdbcTemplate jdbc;
   private final JsonCodec json;
   private final JobTransitionPolicy policy;
+  private final OutboxRepository outbox;
   private static final Set<String> PATCH_COLUMNS =
       Set.of(
           "stage",
@@ -46,10 +48,12 @@ public class JobRepository {
           "solver_profile_version",
           "mock_json");
 
-  public JobRepository(JdbcTemplate jdbc, JsonCodec json, JobTransitionPolicy policy) {
+  public JobRepository(
+      JdbcTemplate jdbc, JsonCodec json, JobTransitionPolicy policy, OutboxRepository outbox) {
     this.jdbc = jdbc;
     this.json = json;
     this.policy = policy;
+    this.outbox = outbox;
   }
 
   public Map<String, Object> findByNo(String jobNo) {
@@ -282,6 +286,7 @@ public class JobRepository {
     return events;
   }
 
+  @Transactional
   public void recordEvent(long jobId, String eventType, Map<String, Object> detail) {
     event(jobId, eventType, null, null, detail);
   }
@@ -295,6 +300,7 @@ public class JobRepository {
         from,
         to,
         json.write(detail == null ? Map.of() : detail));
+    outbox.appendJobEvent(jobId, eventType, from, to, detail == null ? Map.of() : detail);
   }
 
   public void audit(

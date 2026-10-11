@@ -16,6 +16,7 @@ class Settings:
     service_token: str = "demo-service-token"
     backend_url: str = ""
     heartbeat_interval: float = 5
+    callback_interval: float = 0.5
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -33,4 +34,5 @@ class Settings:
             service_token=os.getenv("SERVICE_TOKEN", "demo-service-token"),
             backend_url=os.getenv("BACKEND_URL", ""),
             heartbeat_interval=max(0.1, float(os.getenv("HEARTBEAT_INTERVAL_SECONDS", "5"))),
+            callback_interval=max(0.1, float(os.getenv("CALLBACK_INTERVAL_SECONDS", "0.5"))),
         )

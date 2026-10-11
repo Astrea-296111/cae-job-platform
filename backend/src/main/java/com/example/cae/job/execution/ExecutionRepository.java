@@ -29,7 +29,10 @@ public class ExecutionRepository {
           "cancel_requested",
           "submitted_at",
           "started_at",
-          "finished_at");
+          "running_observed_at",
+          "finished_at",
+          "terminal_applied_at",
+          "result_parse_requested_at");
   private final JdbcTemplate jdbc;
   private final JsonCodec json;
 
@@ -42,6 +45,14 @@ public class ExecutionRepository {
     List<Map<String, Object>> rows =
         jdbc.query("SELECT * FROM cae_job_execution WHERE id=?", SqlRows.MAPPER, id);
     if (rows.isEmpty()) throw ApiException.notFound("Execution");
+    return decode(rows.get(0));
+  }
+
+  public Map<String, Object> findByRequest(String requestId) {
+    List<Map<String, Object>> rows =
+        jdbc.query(
+            "SELECT * FROM cae_job_execution WHERE submit_request_id=?", SqlRows.MAPPER, requestId);
+    if (rows.isEmpty()) throw ApiException.notFound("Execution request");
     return decode(rows.get(0));
   }
 

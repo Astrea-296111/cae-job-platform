@@ -675,12 +675,20 @@ class JobSubmissionIntegrationTest {
         return;
       }
       String external = path.substring("/worker/v1/jobs/".length()).replace("/cancel", "");
+      String requestId =
+          accepted.entrySet().stream()
+              .filter(entry -> entry.getValue().equals(external))
+              .map(Map.Entry::getKey)
+              .findFirst()
+              .orElseThrow();
       respond(
           exchange,
           200,
           Map.of(
               "externalExecutionId",
               external,
+              "executionRequestId",
+              requestId,
               "state",
               path.endsWith("/cancel") ? "CANCELLED" : "RUNNING"));
     }

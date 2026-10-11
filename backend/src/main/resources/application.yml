@@ -46,6 +46,10 @@ cae:
     listeners-enabled: ${CAE_MQ_LISTENERS_ENABLED:true}
   background:
     enabled: ${CAE_BACKGROUND_ENABLED:true}
+  monitor:
+    scan-ms: ${CAE_MONITOR_SCAN_MS:5000}
+    poll-ms: ${CAE_MONITOR_POLL_MS:5000}
+    lease-ms: ${CAE_MONITOR_LEASE_MS:15000}
   nodes:
     suspect-seconds: 10
     offline-seconds: 20

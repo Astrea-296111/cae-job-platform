@@ -100,6 +100,37 @@ PID/creation time and evidence that the child's signal handler is installed. The
 `SUBMITTED`/`RUNNING` with `cancelRequested: true` until the child confirms `CANCELLED`. Repeated
 cancel is safe; a completed `SUCCESS` remains successful.
 
+## Runtime callbacks
+
+An independent asynchronous task POSTs state and progress changes to
+`BACKEND_URL/internal/v1/agents/{nodeId}/executions/callback` using `X-Service-Token`. Its JSON
+contains only `executionRequestId`, `externalExecutionId`, `state`, `progress`, `pid`,
+`processIdentity`, `exitCode`, `rawSolverCode`, `rawMessage`, `startedAt`, and `finishedAt`.
+It never supplies a filesystem path; the backend resolves the immutable attempt workspace itself.
+Identity fields and the runtime state are mandatory; unavailable runtime facts are `null`.
+
+The backend returns HTTP 200 with `accepted: true` after accepting runtime facts, including an
+already applied duplicate (`applied: false`). The worker then durably records the acknowledged
+payload fingerprint. Transport failures, rejected responses, and malformed acknowledgements retain
+the notification and retry with bounded exponential delays of 0.5–30 seconds. A changed runtime
+payload bypasses the delay for an older payload, so confirmed completion can be delivered promptly.
+Each Agent startup replays durable terminal execution records once, including records previously
+acknowledged before the restart. Replay never calls submit or launches a solver.
+
+Callback delivery reads SQLite in bounded pages of 32 executions and permits at most four concurrent
+HTTP requests. Separate active and terminal scan cursors scan current executions on every callback
+iteration while older terminal records replay. Acknowledgements and retry times live in SQLite,
+rather than an unbounded in-memory execution cache. HTTP requests have a three-second timeout,
+ignore ambient proxies, and refuse
+redirects. Lifespan shutdown cancels both callback and heartbeat tasks without stopping independent
+solver processes. Callback failure cannot stop heartbeat emission or Agent API access.
+
+Heartbeat fault injection affects only heartbeats; callbacks continue to carry runtime facts. A
+nonterminal callback from a node whose heartbeat is offline does not clear the backend's `UNKNOWN`
+status or release reservations. A fresh heartbeat followed by reconciliation restores a known live
+state; a confirmed terminal callback can resolve the uncertainty directly. Backend polling uses the
+same durable state application rules and remains available if callback delivery is interrupted.
+
 ## Node status and heartbeat
 
 `GET /worker/v1/node/status` returns `nodeId`, `hostname`, `online`, `cpuTotal`, `cpuUsed`,
@@ -121,5 +152,6 @@ temporarily suppresses heartbeats for the offline demonstration; `true` restores
 is authenticated and affects only heartbeat emission.
 
 Configuration: `DATA_ROOT`, `REGISTRY_PATH`, `NODE_ID`, `CPU_TOTAL`, `MEMORY_TOTAL_GB`, `SOLVER_TAGS`
-(comma separated), `BACKEND_URL`, `SERVICE_TOKEN`, and `HEARTBEAT_INTERVAL_SECONDS`. Production token
+(comma separated), `BACKEND_URL`, `SERVICE_TOKEN`, `HEARTBEAT_INTERVAL_SECONDS`, and
+`CALLBACK_INTERVAL_SECONDS` (default 0.5). Production token
 values must be injected securely and never appear in saved execution configuration.

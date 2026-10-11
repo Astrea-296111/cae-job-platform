@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from agents.callbacks import callback_loop
 from agents.execution_manager import ExecutionManager
 from agents.heartbeat import heartbeat_loop
 from app.agent_api import router
@@ -23,13 +24,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         application.state.settings = settings
         application.state.manager = ExecutionManager(settings)
         application.state.heartbeat_control = {"enabled": True}
-        task = asyncio.create_task(
-            heartbeat_loop(application.state.manager, application.state.heartbeat_control)
+        application.state.heartbeat_task = asyncio.create_task(
+            heartbeat_loop(application.state.manager, application.state.heartbeat_control),
+            name="agent-heartbeat",
         )
-        yield
-        task.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            await task
+        application.state.callback_task = asyncio.create_task(
+            callback_loop(application.state.manager), name="agent-execution-callbacks"
+        )
+        try:
+            yield
+        finally:
+            tasks = (application.state.heartbeat_task, application.state.callback_task)
+            for task in tasks:
+                task.cancel()
+            for task in tasks:
+                with contextlib.suppress(asyncio.CancelledError):
+                    await task
 
     application = FastAPI(
         title="CAE Compute Agent",

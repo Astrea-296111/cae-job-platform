@@ -1,0 +1,79 @@
+{
+  "milestone": 6,
+  "scenarios": [
+    {
+      "jobNo": "CAE-20261011-000082",
+      "executionId": 5,
+      "nodeId": "node-a",
+      "requestId": "exec-60f72184-4fb9-4c51-966c-50aeaf6e97e8",
+      "externalExecutionId": "node-a-fd039f7a313742aeafb9deb58272a981",
+      "processIdentity": "202:1791692567.600000",
+      "backendState": "POST_PROCESSING",
+      "workerState": "SUCCESS",
+      "durableExecutions": 1,
+      "parseCommandLogicalId": "evt-33da24d8-63fc-484f-b00a-0579adf18a38",
+      "parseCommands": 1,
+      "parseQueueMessagePreserved": true,
+      "resourcesReleased": true,
+      "scenario": "backend-restart-during-solver",
+      "workerContainersUnchanged": true,
+      "workerStateDuringRestart": "RUNNING",
+      "recoveredState": "RUNNING"
+    },
+    {
+      "jobNo": "CAE-20261011-000083",
+      "executionId": 6,
+      "nodeId": "node-b",
+      "requestId": "exec-11759173-355e-4690-b3e6-58ade0ab8a69",
+      "externalExecutionId": "node-b-b8cef9aff1ef4dec9efa369aa681e7f5",
+      "processIdentity": "223:1791692610.170000",
+      "backendState": "POST_PROCESSING",
+      "workerState": "SUCCESS",
+      "durableExecutions": 1,
+      "parseCommandLogicalId": "evt-355c0438-45ba-4504-8ef3-3ccd1644ca86",
+      "parseCommands": 1,
+      "parseQueueMessagePreserved": true,
+      "resourcesReleased": true,
+      "scenario": "heartbeat-offline-recovery",
+      "offlineState": "UNKNOWN",
+      "callbacksStayedEnabled": true,
+      "capacityHeldWhileUnknown": true,
+      "runningCallbackDidNotPromoteOfflineJob": true
+    },
+    {
+      "scenario": "runtime-runtime_failed",
+      "jobNo": "CAE-20261011-000084",
+      "executionId": 7,
+      "failureCode": "SOLVER_RUNTIME_FAILED",
+      "rawSolverCode": "MOCK_NUMERICAL_FAILURE",
+      "workerState": "RUNTIME_FAILED",
+      "backendState": "RUNTIME_FAILED",
+      "resourcesReleased": true,
+      "parseCommands": 0
+    },
+    {
+      "scenario": "runtime-timeout",
+      "jobNo": "CAE-20261011-000085",
+      "executionId": 8,
+      "failureCode": "SOLVER_TIMEOUT",
+      "rawSolverCode": "MOCK_TIMEOUT",
+      "workerState": "TIMEOUT",
+      "backendState": "RUNTIME_FAILED",
+      "resourcesReleased": true,
+      "parseCommands": 0
+    },
+    {
+      "jobNo": "CAE-20261011-000086",
+      "executionId": 9,
+      "processIdentity": "266:1791692683.330000",
+      "backendState": "CANCELLED",
+      "workerState": "CANCELLED",
+      "resourcesReleased": true,
+      "parseCommands": 0,
+      "scenario": "cancel-completion-race"
+    }
+  ],
+  "historicalDeadLetterPreserved": "m5-invalid-bb982f6e59bf4dbabebcb1e7c566e13d",
+  "licenseLedgerReturnedToBaseline": true,
+  "scope": "Actual restart and runtime reconciliation; parse commands queued, no parser/report completion claimed"
+}

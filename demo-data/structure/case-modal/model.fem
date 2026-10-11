@@ -1,0 +1,4 @@
+$ SYNTHETIC MODAL INPUT: public workflow fixture, not a commercial solver deck
+INCLUDE 'materials.inc'
+INCLUDE 'properties.inc'
+INCLUDE 'loads.inc'

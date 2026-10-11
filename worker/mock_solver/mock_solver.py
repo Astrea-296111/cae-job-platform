@@ -152,11 +152,15 @@ def run(config: dict) -> int:
                 )
                 time.sleep(min(interval, max(0.02, runtime - elapsed)))
         state["finishedAt"] = utc_now()
-        atomic_json(state_path, state)
         log.write(
             f"{utc_now()} {state['state']} exitCode={state['exitCode']} "
             f"{state['rawMessage'] or ''}\n"
         )
+        log.flush()
+        os.fsync(log.fileno())
+    # A terminal observation is also the publication point for immutable output artifacts.
+    # Publish after closing the log so a parser cannot register a still-changing checksum.
+    atomic_json(state_path, state)
     return state["exitCode"]
 
 

@@ -8,6 +8,7 @@
 | `structure/case-001` | STRUCTURE / BIW_TORSION | API reference example |
 | `structure/case-baseline` | STRUCTURE / BIW_TORSION | V36 baseline, seed 11, thickness 0.95 |
 | `structure/case-current` | STRUCTURE / BIW_TORSION | V37 current, seed 11, thickness 1.05 |
+| `structure/case-modal` | STRUCTURE / BIW_MODAL | V37 modal workflow, seed 43, Subcase 2 |
 | `structure/case-missing-include` | STRUCTURE / BIW_TORSION | Deliberately missing material include |
 | `nvh/case-001` | NVH / CABIN_NVH | PILOT metrics |
 | `crash/case-001` | CRASH / FRONTAL_CRASH | PILOT metrics |

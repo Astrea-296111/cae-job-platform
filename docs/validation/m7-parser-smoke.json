@@ -1,0 +1,193 @@
+{
+  "milestone": 7,
+  "scenarios": [
+    {
+      "jobNo": "CAE-20261011-000087",
+      "analysisType": "STRUCTURE",
+      "conditionCode": "BIW_TORSION",
+      "subcase": 1,
+      "executionId": 10,
+      "processIdentity": "62:1791694004.250000",
+      "parserVersion": "v1",
+      "parseRecordId": 6,
+      "maturity": "COMPLETE",
+      "metricCount": 7,
+      "rawChecksum": "69257907dc4844d81b484560faea20363d441465ae55d557febcaa8d69939075",
+      "artifactChecksums": {
+        "RESULT_JSON": "b33c0cd1c04c68ad70c30c32c889d7ca9d33e63fec3b676ff3e846cb49f71696",
+        "RESULT_CSV": "19d0695b6ff02940bece6311f257eb2b6e87a6eabbb2550de3fca628db7797d1"
+      },
+      "rawValuesMatchAllCanonicalMetrics": true,
+      "postCommandLogicalId": "evt-f52b519f-d263-4c98-a27c-b07acc9f10ef",
+      "postQueueMessagePreserved": true
+    },
+    {
+      "jobNo": "CAE-20261011-000088",
+      "analysisType": "STRUCTURE",
+      "conditionCode": "BIW_MODAL",
+      "subcase": 2,
+      "executionId": 11,
+      "processIdentity": "75:1791694020.470000",
+      "parserVersion": "v1",
+      "parseRecordId": 8,
+      "maturity": "COMPLETE",
+      "metricCount": 7,
+      "rawChecksum": "4e5c26910336ebdff916252ad808fb8416e13551a9e3ac7606ad37975f61eb7e",
+      "artifactChecksums": {
+        "RESULT_JSON": "7c103721b187f0d0b0b773d81375d3f3d35439c2ac42768d3512e7bf2534a612",
+        "RESULT_CSV": "c49536522c19a4d5eafb922e6e1fee68633e6285179944ca9d8ec2483cd65e11"
+      },
+      "rawValuesMatchAllCanonicalMetrics": true,
+      "postCommandLogicalId": "evt-59500804-dcce-4f9f-994e-d688d0d1f09d",
+      "postQueueMessagePreserved": true
+    },
+    {
+      "jobNo": "CAE-20261011-000089",
+      "analysisType": "NVH",
+      "conditionCode": "CABIN_NVH",
+      "subcase": 1,
+      "executionId": 12,
+      "processIdentity": "82:1791694027.120000",
+      "parserVersion": "v1",
+      "parseRecordId": 9,
+      "maturity": "PILOT",
+      "metricCount": 2,
+      "rawChecksum": "9ab842010d6d90039b719d4f20beb4ec39c59e664fd83b66e19e98aee786757b",
+      "artifactChecksums": {
+        "RESULT_JSON": "ccad51f338fba6cd6094326f33c474e2444e21f5c1918582aff1541705631126",
+        "RESULT_CSV": "01305f266efb8633594c175f5fe68403e6bce8303b1ffb194ee40d3e78082b5d"
+      },
+      "rawValuesMatchAllCanonicalMetrics": true,
+      "postCommandLogicalId": "evt-a07de9c6-5954-4966-9555-0be6b1a96e38",
+      "postQueueMessagePreserved": true
+    },
+    {
+      "jobNo": "CAE-20261011-000090",
+      "analysisType": "CRASH",
+      "conditionCode": "FRONTAL_CRASH",
+      "subcase": 1,
+      "executionId": 13,
+      "processIdentity": "79:1791694033.340000",
+      "parserVersion": "v1",
+      "parseRecordId": 10,
+      "maturity": "PILOT",
+      "metricCount": 3,
+      "rawChecksum": "396dfa266954325a46acb31657d9e7d52ece622bdc58e5493a21cc897912370c",
+      "artifactChecksums": {
+        "RESULT_JSON": "3a1bae0b24d79bcfaeb717b4d10a0db0525ca80b7e7db0eb90db705df190d848",
+        "RESULT_CSV": "253d6d916aeb15eef6074338c65747ec42c6596ab776ee7bf9a7c42dc925fc6f"
+      },
+      "rawValuesMatchAllCanonicalMetrics": true,
+      "postCommandLogicalId": "evt-de185d28-2e91-4470-a0ba-edfb9925bc9f",
+      "postQueueMessagePreserved": true
+    },
+    {
+      "jobNo": "CAE-20261011-000091",
+      "analysisType": "CFD",
+      "conditionCode": "DRAG",
+      "subcase": 1,
+      "executionId": 14,
+      "processIdentity": "84:1791694039.430000",
+      "parserVersion": "v1",
+      "parseRecordId": 11,
+      "maturity": "PILOT",
+      "metricCount": 4,
+      "rawChecksum": "ba3ccc47410b9c1c4501538a2579fc3fe9b128461d7343bf3b69257da3fe9ec1",
+      "artifactChecksums": {
+        "RESULT_JSON": "7fd0b2907a33d01c5477aa05709880795b1e8741235ea04db9a69fb8e8b424db",
+        "RESULT_CSV": "39b12890576c68f37088d4e2d6d30ccb8661b3fa00a1c3e79f9f338f190cd1d8"
+      },
+      "rawValuesMatchAllCanonicalMetrics": true,
+      "postCommandLogicalId": "evt-96a2560e-8825-485b-b21b-ce203858b085",
+      "postQueueMessagePreserved": true
+    }
+  ],
+  "duplicateParse": {
+    "logicalEventIds": [
+      "evt-a8a81148-ba29-444b-acd2-cb76552ae681",
+      "m7-repeat-0c77be0254fb4395a4cdeca523c98030"
+    ],
+    "physicalDeliveryIds": [
+      "m7-delivery-13ad4cf5a2954d5e931aabf0fa836b76",
+      "m7-delivery-aba5fefe6d0c4cddaabb3459dc70b203"
+    ],
+    "inbox": [
+      {
+        "status": "DONE",
+        "consumerName": "result-parse-v1",
+        "logicalEventId": "evt-a8a81148-ba29-444b-acd2-cb76552ae681"
+      },
+      {
+        "status": "DONE",
+        "consumerName": "result-parse-v1",
+        "logicalEventId": "m7-repeat-0c77be0254fb4395a4cdeca523c98030"
+      }
+    ],
+    "brokerAckDelta": 2,
+    "parseRecords": 1,
+    "metrics": 7,
+    "versionedArtifacts": 2,
+    "executionCount": 1
+  },
+  "versionedReparse": {
+    "concurrentRequests": 6,
+    "v1ParseRecordId": 6,
+    "v2ParseRecordId": 7,
+    "v1ArtifactsUnchanged": true,
+    "v2Artifacts": [
+      {
+        "id": 27,
+        "uri": "jobs/CAE-20261011-000087/derived/v2/result.json",
+        "checksum": "3a8a5622d927f4cc3b15707f4c4a5e5ab5216ec50e03bf68be0b653b7095c3ab"
+      },
+      {
+        "id": 28,
+        "uri": "jobs/CAE-20261011-000087/derived/v2/result.csv",
+        "checksum": "987dd741201ec4184166cb4daabb24af32263360f89f359cd94112e2212b9774"
+      }
+    ],
+    "sameRawChecksum": true,
+    "executionCount": 1,
+    "postCommandLogicalId": "evt-c75c3abd-b42d-4353-8456-3cf51cc5fdfd"
+  },
+  "m6CommandsRelayed": [
+    {
+      "jobNo": "CAE-20261011-000082",
+      "parseRecordId": 4,
+      "postCommandLogicalId": "evt-6e515b83-0030-4dc5-85f6-c1a6a7f58667",
+      "postQueueMessagePreserved": true
+    },
+    {
+      "jobNo": "CAE-20261011-000083",
+      "parseRecordId": 5,
+      "postCommandLogicalId": "evt-490a663f-a187-472e-aeeb-c5fcc21e7cc8",
+      "postQueueMessagePreserved": true
+    }
+  ],
+  "historicalDeadLetterPreserved": "m5-invalid-bb982f6e59bf4dbabebcb1e7c566e13d",
+  "caseCatalogCount": 9,
+  "threeFreshNodeHeartbeatsVerified": true,
+  "nodeLedgerBaseline": {
+    "node-a": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "node-b": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "node-c": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "nodeLedgerReturnedToBaseline": true,
+  "licenseLedgerReturnedToBaseline": true,
+  "scope": "Actual four-discipline parsing and versioned immutable JSON/CSV; post/report completion awaits M8"
+}

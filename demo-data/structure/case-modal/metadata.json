@@ -1,0 +1,9 @@
+{
+  "synthetic": true,
+  "modelRevision": "V37",
+  "analysisType": "STRUCTURE",
+  "conditionCode": "BIW_MODAL",
+  "subcase": 2,
+  "seed": 43,
+  "origin": "public-generated-fixture"
+}

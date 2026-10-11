@@ -36,6 +36,11 @@ public class CaseCatalogService {
             "casePath", caseRoot.relativize(manifest.getParent()).toString().replace('\\', '/'));
         for (String key : List.of("caseId", "analysisType", "conditionCode", "modelRevision"))
           entry.put(key, source.get(key));
+        Object subcase =
+            source.get("parameters") instanceof Map<?, ?> parameters
+                ? parameters.get("subcase")
+                : null;
+        entry.put("subcase", subcase == null ? 1 : subcase);
         entry.put("synthetic", true);
         cases.add(entry);
       }

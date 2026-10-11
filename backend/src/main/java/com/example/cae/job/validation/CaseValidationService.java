@@ -37,8 +37,11 @@ public class CaseValidationService {
       snapshots.verifySnapshot(requested);
       return jobs.findById(id);
     }
-    if (status != JobStatus.CREATED && status != JobStatus.VALIDATION_FAILED)
-      throw ApiException.conflict("Job can be validated only from CREATED or VALIDATION_FAILED");
+    if (status != JobStatus.CREATED
+        && status != JobStatus.VALIDATION_FAILED
+        && status != JobStatus.CANCELLED)
+      throw ApiException.conflict(
+          "Job can be validated only from CREATED, VALIDATION_FAILED or CANCELLED");
     Map<String, Object> validating =
         jobs.transition(requested, JobStatus.VALIDATING, "VALIDATION_STARTED", Map.of());
     try {

@@ -53,7 +53,12 @@ public class DefaultJobTransitionPolicy implements JobTransitionPolicy {
         JobStatus.SUCCESS,
         JobStatus.REPORT_FAILED,
         JobStatus.CANCEL_REQUESTED);
-    allow(JobStatus.CANCEL_REQUESTED, JobStatus.CANCELLED, JobStatus.UNKNOWN);
+    allow(
+        JobStatus.CANCEL_REQUESTED,
+        JobStatus.CANCELLED,
+        JobStatus.UNKNOWN,
+        JobStatus.POST_PROCESSING,
+        JobStatus.RUNTIME_FAILED);
     allow(
         JobStatus.UNKNOWN,
         JobStatus.SUBMITTED,
@@ -69,7 +74,7 @@ public class DefaultJobTransitionPolicy implements JobTransitionPolicy {
     allow(JobStatus.RUNTIME_FAILED, JobStatus.READY);
     allow(JobStatus.POST_PROCESS_FAILED, JobStatus.POST_PROCESSING);
     allow(JobStatus.REPORT_FAILED, JobStatus.REPORTING);
-    allow(JobStatus.CANCELLED, JobStatus.READY);
+    allow(JobStatus.CANCELLED, JobStatus.READY, JobStatus.VALIDATING);
   }
 
   private static void allow(JobStatus from, JobStatus... to) {

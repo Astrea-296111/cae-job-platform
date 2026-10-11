@@ -125,13 +125,13 @@ class JobDomainIntegrationTest {
   }
 
   @Test
-  void staleMetadataCannotReplaceNewExecutionAssociation() throws Exception {
+  void staleMetadataCannotReplaceNewWorkspaceAssociation() throws Exception {
     Map<String, Object> job = create();
-    Map<String, Object> changed = jobs.patch(job, Map.of("currentExecutionId", 101L));
-    assertThat(changed.get("currentExecutionId")).isEqualTo(101L);
-    assertThatThrownBy(() -> jobs.patch(job, Map.of("currentExecutionId", 102L)))
+    Map<String, Object> changed = jobs.patch(job, Map.of("workspace", "/data/jobs/current"));
+    assertThat(changed.get("workspace")).isEqualTo("/data/jobs/current");
+    assertThatThrownBy(() -> jobs.patch(job, Map.of("workspace", "/data/jobs/stale")))
         .isInstanceOf(ApiException.class);
-    assertThat(jobs.findById(SqlRows.id(job)).get("currentExecutionId")).isEqualTo(101L);
+    assertThat(jobs.findById(SqlRows.id(job)).get("workspace")).isEqualTo("/data/jobs/current");
   }
 
   @Test

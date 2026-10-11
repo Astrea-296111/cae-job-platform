@@ -103,10 +103,16 @@ cancel is safe; a completed `SUCCESS` remains successful.
 ## Node status and heartbeat
 
 `GET /worker/v1/node/status` returns `nodeId`, `hostname`, `online`, `cpuTotal`, `cpuUsed`,
-`cpuReserved`, `memoryTotalGb`, `memoryUsedGb`, `memoryReservedGb`, `solverTags`, `runningJobs`, and
+`cpuReserved`, `memoryTotalGb`, `memoryUsedGb`, `memoryReservedGb`, `solverTags`, `runningJobs`,
+`workspaceReachable`, and
 `lastHeartbeat`. `runningJobs` is a list of external execution IDs. Used resources represent the
 declared synthetic execution slots; agent reserved counters are zero because the control plane owns
 reservations. Unknown executions conservatively retain slots until reconciliation.
+
+`workspaceReachable` checks that the configured shared filesystem root is a real directory with
+read/write/traverse access. If `jobs/` already exists, it must also be a real accessible directory.
+Before the first job, an absent `jobs/` is acceptable when the root is accessible. This signal lets
+the scheduler reject a node whose shared storage is missing or inaccessible.
 
 Every five seconds the agent POSTs this JSON to
 `BACKEND_URL/internal/v1/agents/{nodeId}/heartbeat` with the service token. A bounded network failure

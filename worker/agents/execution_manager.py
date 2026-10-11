@@ -194,10 +194,27 @@ class ExecutionManager:
                 active.append(row["external_id"])
                 cpu_used += request["resource"]["cpu"]
                 memory_used += request["resource"]["memoryGb"]
+        root = self.settings.data_root
+        jobs_root = root / "jobs"
+        required_access = os.R_OK | os.W_OK | os.X_OK
+        workspace_reachable = (
+            root.is_dir()
+            and not root.is_symlink()
+            and os.access(root, required_access)
+            and (
+                not jobs_root.exists()
+                or (
+                    jobs_root.is_dir()
+                    and not jobs_root.is_symlink()
+                    and os.access(jobs_root, required_access)
+                )
+            )
+        )
         return {
             "nodeId": self.settings.node_id,
             "hostname": socket.gethostname(),
             "online": True,
+            "workspaceReachable": workspace_reachable,
             "cpuTotal": self.settings.cpu_total,
             "cpuUsed": cpu_used,
             "cpuReserved": 0,

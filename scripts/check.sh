@@ -20,7 +20,7 @@ for argument in "$@"; do
   esac
 done
 
-bash scripts/mvn.sh -f backend/pom.xml spotless:check verify
+bash scripts/test-backend.sh spotless:check verify
 worker_python="$repo_root/worker/.venv/bin/python"
 if [[ ! -x "$worker_python" ]]; then worker_python="$repo_root/.venv/bin/python"; fi
 (cd worker && "$worker_python" -m ruff check . && "$worker_python" -m ruff format --check . && "$worker_python" -m pytest -q)
@@ -64,13 +64,22 @@ guard_build_space() {
     # Keep every container, named image and volume, including running Solver state.
     docker builder prune -af
     docker image prune -f
+    available_mb=$(df -Pk "$repo_root" | awk 'NR == 2 { print int($4 / 1024) }')
+    if [[ "$available_mb" -lt "$threshold_mb" ]]; then
+      printf 'Docker vfs still has %s MiB free; %s MiB is required before continuing. Existing containers, named images and volumes were retained.\n' "$available_mb" "$threshold_mb" >&2
+      return 1
+    fi
   fi
 }
 
 built=false
 for application in backend worker frontend; do
   if [[ "${requested[$application]:-0}" == 1 ]]; then
-    guard_build_space 6144
+    # The Java build copies a full JDK/Maven filesystem under vfs; the smaller
+    # Python/Node builds retain a 4 GiB reserve without discarding useful caches.
+    build_reserve=4096
+    if [[ "$application" == backend ]]; then build_reserve=6144; fi
+    guard_build_space "$build_reserve"
     service=$application
     if [[ "$application" == worker ]]; then service=worker-node-a; fi
     printf 'Building affected application image: %s\n' "$application"

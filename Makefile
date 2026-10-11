@@ -38,7 +38,7 @@ test:
 	$(MAKE) test-backend test-worker test-frontend
 
 test-backend:
-	cd backend && ../scripts/mvn.sh test
+	bash scripts/test-backend.sh test
 
 test-worker:
 	cd worker && "$(WORKER_PYTHON)" -m pytest

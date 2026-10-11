@@ -30,6 +30,7 @@ public class AgentHeartbeatController {
       @NotBlank String nodeId,
       @NotBlank @Size(max = 128) String hostname,
       @NotNull Boolean online,
+      Boolean workspaceReachable,
       @Min(1) @Max(1024) int cpuTotal,
       @Min(0) int cpuUsed,
       @Min(0) int cpuReserved,

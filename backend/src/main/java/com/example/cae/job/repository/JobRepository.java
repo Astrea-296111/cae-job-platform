@@ -19,6 +19,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
@@ -42,7 +43,8 @@ public class JobRepository {
           "started_at",
           "finished_at",
           "priority",
-          "solver_profile_version");
+          "solver_profile_version",
+          "mock_json");
 
   public JobRepository(JdbcTemplate jdbc, JsonCodec json, JobTransitionPolicy policy) {
     this.jdbc = jdbc;
@@ -64,10 +66,26 @@ public class JobRepository {
     return decode(jobs.get(0));
   }
 
+  @Transactional(propagation = Propagation.MANDATORY)
+  public Map<String, Object> lockById(long id) {
+    List<Map<String, Object>> rows =
+        jdbc.query("SELECT * FROM cae_job WHERE id=? FOR UPDATE", SqlRows.MAPPER, id);
+    if (rows.isEmpty()) throw ApiException.notFound("Job");
+    return decode(rows.get(0));
+  }
+
+  @Transactional(propagation = Propagation.MANDATORY)
+  public Map<String, Object> lockByNo(String jobNo) {
+    List<Map<String, Object>> rows =
+        jdbc.query("SELECT * FROM cae_job WHERE job_no=? FOR UPDATE", SqlRows.MAPPER, jobNo);
+    if (rows.isEmpty()) throw ApiException.notFound("Job");
+    return decode(rows.get(0));
+  }
+
   @Transactional
   public Map<String, Object> create(Map<String, Object> fields) {
     String sql =
-        "INSERT INTO cae_job(job_no,project_id,model_revision_id,analysis_type,condition_code,solver_type,solver_profile,priority,status,submitter_id,input_manifest_uri,resource_profile_id,case_path,input_json,resource_json,mock_json,batch_id) VALUES(?,?,?,?,?,?,?,?,'CREATED',?,?,?,?,?,?,?,?)";
+        "INSERT INTO cae_job(job_no,project_id,model_revision_id,analysis_type,condition_code,solver_type,solver_profile,priority,status,submitter_id,input_manifest_uri,resource_profile_id,case_path,input_json,resource_json,mock_json,batch_id,license_feature,license_token_count,resource_profile_version) VALUES(?,?,?,?,?,?,?,?,'CREATED',?,?,?,?,?,?,?,?,?,?,?)";
     Object[] values = {
       "NEW-" + UUID.randomUUID(),
       fields.get("projectId"),
@@ -84,7 +102,10 @@ public class JobRepository {
       json.write(fields.getOrDefault("input", Map.of())),
       json.write(fields.get("resource")),
       json.write(fields.getOrDefault("mock", Map.of())),
-      fields.get("batchId")
+      fields.get("batchId"),
+      fields.getOrDefault("licenseFeature", "OPTISTRUCT"),
+      fields.getOrDefault("licenseTokenCount", 1),
+      fields.getOrDefault("resourceProfileVersion", 0L)
     };
     GeneratedKeyHolder keys = new GeneratedKeyHolder();
     jdbc.update(
@@ -163,7 +184,7 @@ public class JobRepository {
           if (!PATCH_COLUMNS.contains(column))
             throw new IllegalArgumentException("Unsupported Job metadata field: " + field);
           assignment.add(column + "=?");
-          values.add(value);
+          values.add(column.endsWith("_json") ? json.write(value) : value);
         });
     values.add(id);
     values.add(expected.get("version"));

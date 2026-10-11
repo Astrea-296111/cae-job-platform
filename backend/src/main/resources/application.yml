@@ -1,6 +1,11 @@
 server:
   port: 8080
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      timeout: 1s
   datasource:
     url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/cae?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC}
     username: ${DB_USER:cae}
@@ -19,3 +24,18 @@ management:
     web:
       exposure:
         include: health,prometheus
+cae:
+  background:
+    enabled: ${CAE_BACKGROUND_ENABLED:true}
+  nodes:
+    suspect-seconds: 10
+    offline-seconds: 20
+    refresh-ms: 5000
+  scheduler:
+    scan-ms: 1000
+    weights:
+      priority: 1.0
+      waiting-seconds: 0.02
+      free-cpu: 20.0
+      free-memory: 20.0
+      running-penalty: 5.0

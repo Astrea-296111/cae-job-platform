@@ -6,11 +6,12 @@ import com.example.cae.common.SqlRows;
 import com.example.cae.job.api.CreateJobRequest;
 import com.example.cae.job.repository.JobRepository;
 import com.example.cae.project.ProjectService;
+import com.example.cae.resource.ResourceProfileRegistry;
+import com.example.cae.scheduler.SchedulerService;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +21,17 @@ public class JobApplicationService {
   private final JobRepository jobs;
   private final ProjectAccess access;
   private final ProjectService projects;
+  private final ResourceProfileRegistry profiles;
 
-  public JobApplicationService(JobRepository jobs, ProjectAccess access, ProjectService projects) {
+  public JobApplicationService(
+      JobRepository jobs,
+      ProjectAccess access,
+      ProjectService projects,
+      ResourceProfileRegistry profiles) {
     this.jobs = jobs;
     this.access = access;
     this.projects = projects;
+    this.profiles = profiles;
   }
 
   @Transactional
@@ -56,9 +63,9 @@ public class JobApplicationService {
       throw ApiException.invalid("Solver profile and solver type must match the analysis type");
     String resourceProfile =
         request.resourceProfile() == null ? "STANDARD" : request.resourceProfile();
-    if (!Set.of("SMALL", "STANDARD", "LARGE").contains(resourceProfile))
-      throw ApiException.invalid("Unknown resource profile");
-    Map<String, Object> resource = resource(request.resource(), resourceProfile);
+    ResourceProfileRegistry.Snapshot selected =
+        profiles.select(resourceProfile, request.analysisType(), request.resource());
+    Map<String, Object> resource = selected.resource();
     Map<String, Object> input = request.input() == null ? Map.of() : request.input();
     Object manifest = input.get("manifest");
     if (manifest != null && !(manifest instanceof String))
@@ -94,6 +101,9 @@ public class JobApplicationService {
     fields.put("input", input);
     fields.put("resource", resource);
     fields.put("resourceProfileId", resourceProfile);
+    fields.put("resourceProfileVersion", selected.version());
+    fields.put("licenseFeature", SchedulerService.feature(solver));
+    fields.put("licenseTokenCount", selected.licenseTokens());
     fields.put("mock", request.mock() == null ? Map.of() : request.mock());
     Map<String, Object> created = jobs.create(fields);
     jobs.audit(
@@ -104,37 +114,6 @@ public class JobApplicationService {
         null,
         Map.of("status", created.get("status"), "projectId", created.get("projectId")));
     return created;
-  }
-
-  private Map<String, Object> resource(Map<String, Object> requested, String profile) {
-    int cpu =
-        switch (profile) {
-          case "SMALL" -> 4;
-          case "LARGE" -> 16;
-          default -> 8;
-        };
-    Map<String, Object> result =
-        new LinkedHashMap<>(Map.of("cpu", cpu, "memoryGb", cpu * 2, "walltimeMin", 30));
-    if (requested != null) {
-      for (String field : requested.keySet())
-        if (!Set.of("cpu", "memoryGb", "walltimeMin").contains(field))
-          throw ApiException.invalid("Unsupported resource field: " + field);
-      result.putAll(requested);
-    }
-    range(result, "cpu", 1, 32);
-    range(result, "memoryGb", 1, 64);
-    range(result, "walltimeMin", 1, 120);
-    return result;
-  }
-
-  private void range(Map<String, Object> value, String key, int min, int max) {
-    Object field = value.get(key);
-    if (!(field instanceof Number number)
-        || number.doubleValue() != number.intValue()
-        || number.intValue() < min
-        || number.intValue() > max)
-      throw ApiException.invalid(
-          "Resource " + key + " must be an integer between " + min + " and " + max);
   }
 
   public Map<String, Object> get(Authentication user, String jobNo) {

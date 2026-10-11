@@ -32,6 +32,13 @@ Specification: `docs/reference/Codex提示词_CAE仿真任务调度结果管理�
 - Decisions: ADR-003 records the non-atomic SQLite-claim/process-launch window and conservative UNKNOWN handling; ADR-005 records shared filesystem boundaries. No exactly-once delivery claim.
 
 ## Milestone 4
-- [ ] Persistent node registry, scheduling, license/resource reservation and submission orchestration.
+- [x] Durable three-node registry, Redis observation cache, hard filters/weighted scoring, atomic CPU/memory/license reservations and administrative resource profiles.
+- [x] Idempotent submit/retry commands, immutable execution attempts, conservative transport retries, confirmed remote cancellation and automatic WAITING_RESOURCE scans.
+- Tests: Java 152 passed; Python 36 passed; all format/lint/type/build checks pass. Backend and Worker images rebuilt and started healthy. Live eight concurrent duplicate commands produced one execution/PID; confirmed running cancellation restored its node and license counters. All three nodes ONLINE/reachable. Evidence: `docs/validation/m4-scheduler-smoke.json` and `docs/validation/m4-validation.md`.
+- Known issues: none blocking M4. Successful Solver completion remains backend SUBMITTED with capacity held until the M6 monitor; this is explicitly checked rather than presented as a completed pipeline. Old M1 test fixtures contained seven fabricated execution references; backed up and audited their targeted repair before applying V2/V3. Tests now use owned schemas/cache namespaces.
+- Decisions: ADR-007 specifies MySQL as admission truth and Job → license → node → reservation locking. Image builds retain a measured 6 GiB reserve for Java and 4 GiB for the smaller Worker/frontend builds under Docker vfs; only unused caches/dangling images are pruned.
+
+## Milestone 5
+- [ ] RabbitMQ durable commands, transactional Outbox, publisher confirms, manual ACK, Inbox idempotency and bounded retries/DLQ.
 - Tests: not yet run.
 - Known issues: none established.

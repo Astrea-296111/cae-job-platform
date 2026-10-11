@@ -3,6 +3,8 @@ package com.example.cae.common;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +21,8 @@ public final class SqlRows {
     for (int i = 1; i <= meta.getColumnCount(); i++) {
       Object value = rs.getObject(i);
       if (value instanceof Timestamp timestamp) value = timestamp.toInstant().toString();
+      if (value instanceof LocalDateTime dateTime)
+        value = dateTime.toInstant(ZoneOffset.UTC).toString();
       result.put(lowerCamel(meta.getColumnLabel(i)), value);
     }
     return result;

@@ -26,6 +26,7 @@ public class ReportApplicationService {
   private final PipelineService pipeline;
   private final RenderFingerprint fingerprints;
   private final TransactionTemplate tx;
+  private final BaselineComparisonService comparisons;
 
   public ReportApplicationService(
       JobRepository jobs,
@@ -36,7 +37,8 @@ public class ReportApplicationService {
       PipelineRequestBuilder builder,
       PipelineService pipeline,
       RenderFingerprint fingerprints,
-      TransactionTemplate tx) {
+      TransactionTemplate tx,
+      BaselineComparisonService comparisons) {
     this.jobs = jobs;
     this.executions = executions;
     this.access = access;
@@ -46,6 +48,44 @@ public class ReportApplicationService {
     this.pipeline = pipeline;
     this.fingerprints = fingerprints;
     this.tx = tx;
+    this.comparisons = comparisons;
+  }
+
+  public List<Map<String, Object>> baselines(
+      Authentication user, String jobNo, String parserVersion) {
+    var job = jobs.findByNo(jobNo);
+    access.requireJob(user, job);
+    var parse =
+        results
+            .find(SqlRows.id(job), parserVersion)
+            .orElseThrow(() -> com.example.cae.common.ApiException.notFound("Parser version"));
+    return repository.baselines(job, parse);
+  }
+
+  public Map<String, Object> comparison(
+      Authentication user, String jobNo, String parserVersion, String baselineJobNo) {
+    var job = jobs.findByNo(jobNo);
+    access.requireJob(user, job);
+    if (baselineJobNo != null) access.requireJob(user, jobs.findByNo(baselineJobNo));
+    var parse =
+        results
+            .find(SqlRows.id(job), parserVersion)
+            .orElseThrow(() -> com.example.cae.common.ApiException.notFound("Parser version"));
+    var base = repository.baseline(job, parse, baselineJobNo);
+    if (baselineJobNo != null && base.isEmpty())
+      throw com.example.cae.common.ApiException.invalid("Baseline is incompatible");
+    var response = new java.util.LinkedHashMap<String, Object>();
+    response.put(
+        "baseline",
+        base.isEmpty()
+            ? null
+            : Map.of("jobNo", base.get().get("jobNo"), "parseRecordId", SqlRows.id(base.get())));
+    response.put(
+        "comparisons",
+        comparisons.compare(
+            repository.metrics(SqlRows.id(parse)),
+            base.isEmpty() ? List.of() : repository.metrics(SqlRows.id(base.get()))));
+    return response;
   }
 
   public List<Map<String, Object>> reports(Authentication user, Long project, String jobNo) {

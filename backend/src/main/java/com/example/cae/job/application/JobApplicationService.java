@@ -2,10 +2,13 @@ package com.example.cae.job.application;
 
 import com.example.cae.auth.ProjectAccess;
 import com.example.cae.common.ApiException;
+import com.example.cae.common.JsonCodec;
 import com.example.cae.common.SqlRows;
 import com.example.cae.job.api.CreateJobRequest;
+import com.example.cae.job.repository.CreateRequestRepository;
 import com.example.cae.job.repository.JobRepository;
 import com.example.cae.project.ProjectService;
+import com.example.cae.report.RenderFingerprint;
 import com.example.cae.resource.ResourceProfileRegistry;
 import com.example.cae.scheduler.SchedulerService;
 import java.time.LocalDate;
@@ -22,22 +25,45 @@ public class JobApplicationService {
   private final ProjectAccess access;
   private final ProjectService projects;
   private final ResourceProfileRegistry profiles;
+  private final CreateRequestRepository creates;
+  private final RenderFingerprint fingerprints;
+  private final JsonCodec json;
+  private final JobQueryCache cache;
 
   public JobApplicationService(
       JobRepository jobs,
       ProjectAccess access,
       ProjectService projects,
-      ResourceProfileRegistry profiles) {
+      ResourceProfileRegistry profiles,
+      CreateRequestRepository creates,
+      RenderFingerprint fingerprints,
+      JsonCodec json,
+      JobQueryCache cache) {
     this.jobs = jobs;
     this.access = access;
     this.projects = projects;
     this.profiles = profiles;
+    this.creates = creates;
+    this.fingerprints = fingerprints;
+    this.json = json;
+    this.cache = cache;
   }
 
   @Transactional
   public Map<String, Object> create(Authentication user, CreateJobRequest request) {
+    return create(user, request, null);
+  }
+
+  @Transactional
+  public Map<String, Object> create(Authentication user, CreateJobRequest request, String key) {
     access.require(user, request.projectId());
     projects.requireRevision(request.projectId(), request.modelRevisionId());
+    if (key != null) {
+      var normalized = new LinkedHashMap<>(json.readMap(json.write(request)));
+      normalized.put("priority", request.priority() == null ? 50 : request.priority());
+      Long previous = creates.claim(user.getName(), key, fingerprints.of(normalized));
+      if (previous != null) return jobs.lockById(previous);
+    }
     String profile =
         request.solverProfile() == null
             ? request.analysisType().name() + "_STANDARD"
@@ -106,6 +132,7 @@ public class JobApplicationService {
     fields.put("licenseTokenCount", selected.licenseTokens());
     fields.put("mock", request.mock() == null ? Map.of() : request.mock());
     Map<String, Object> created = jobs.create(fields);
+    if (key != null) creates.complete(user.getName(), key, SqlRows.id(created));
     jobs.audit(
         user.getName(),
         "JOB_CREATE",
@@ -117,9 +144,7 @@ public class JobApplicationService {
   }
 
   public Map<String, Object> get(Authentication user, String jobNo) {
-    Map<String, Object> job = jobs.findByNo(jobNo);
-    access.requireJob(user, job);
-    return job;
+    return cache.get(user, jobNo, () -> jobs.findByNo(jobNo));
   }
 
   public List<Map<String, Object>> events(Authentication user, String jobNo) {
@@ -141,9 +166,21 @@ public class JobApplicationService {
       }
     }
     Object from = filters.get("dateFrom");
-    if (from != null) filters.put("createdFrom", date(from.toString()));
+    java.time.ZoneId zone;
+    try {
+      zone = java.time.ZoneId.of(filters.getOrDefault("timeZone", "UTC").toString());
+    } catch (java.time.DateTimeException invalid) {
+      throw ApiException.invalid("Unknown time zone");
+    }
+    if (from != null)
+      filters.put(
+          "createdFrom",
+          java.sql.Timestamp.from(date(from.toString()).atStartOfDay(zone).toInstant()));
     Object to = filters.get("dateTo");
-    if (to != null) filters.put("createdTo", date(to.toString()).plusDays(1));
+    if (to != null)
+      filters.put(
+          "createdTo",
+          java.sql.Timestamp.from(date(to.toString()).plusDays(1).atStartOfDay(zone).toInstant()));
     return Map.of(
         "items",
         jobs.list(filters, page * size, size),
@@ -170,6 +207,7 @@ public class JobApplicationService {
     if (priority < 0 || priority > 100)
       throw ApiException.invalid("Priority must be between 0 and 100");
     Map<String, Object> result = jobs.patch(SqlRows.id(job), Map.of("priority", priority));
+    jobs.recordEvent(SqlRows.id(job), "JOB_PRIORITY_CHANGED", Map.of("priority", priority));
     jobs.audit(
         user.getName(),
         "PRIORITY_CHANGE",

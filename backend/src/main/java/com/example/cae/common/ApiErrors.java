@@ -115,6 +115,20 @@ public class ApiErrors {
         .body(body("FORBIDDEN", "Access is denied", request, Map.of()));
   }
 
+  @ExceptionHandler(
+      org.springframework.web.context.request.async.AsyncRequestNotUsableException.class)
+  void disconnected() {
+    // The response transport has closed; writing an error body is no longer possible.
+  }
+
+  @ExceptionHandler(IOException.class)
+  ResponseEntity<Map<String, Object>> ioFailure(
+      IOException error, HttpServletRequest request, HttpServletResponse response) {
+    if (response.isCommitted() && request.getRequestURI().equals("/api/v1/events/stream"))
+      return null;
+    return unexpected(error, request);
+  }
+
   @ExceptionHandler(Exception.class)
   ResponseEntity<Map<String, Object>> unexpected(Exception error, HttpServletRequest request) {
     LOG.error(

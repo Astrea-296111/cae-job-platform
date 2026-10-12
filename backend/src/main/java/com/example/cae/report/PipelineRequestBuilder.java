@@ -155,6 +155,10 @@ public class PipelineRequestBuilder {
     if (!descriptor.checksum().equals(manifest.get("checksum")))
       throw new IllegalArgumentException("Selected post manifest changed");
     request.put("reportVersion", version);
+    String template =
+        request.get("analysisType").equals("STRUCTURE") ? "STRUCTURE_DRAFT" : "PILOT_DRAFT";
+    if (!repository.templateEnabled(template))
+      throw ApiException.conflict("The selected report template is disabled");
     request.put(
         "templateCode",
         request.get("analysisType").equals("STRUCTURE") ? "STRUCTURE_DRAFT" : "PILOT_DRAFT");

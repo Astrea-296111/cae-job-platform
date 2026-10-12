@@ -3,6 +3,7 @@ package com.example.cae.job.repository;
 import com.example.cae.common.ApiException;
 import com.example.cae.common.JsonCodec;
 import com.example.cae.common.SqlRows;
+import com.example.cae.job.application.JobChanged;
 import com.example.cae.job.domain.CaeJob;
 import com.example.cae.job.domain.JobStatus;
 import com.example.cae.job.domain.JobTransitionPolicy;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
@@ -29,6 +31,7 @@ public class JobRepository {
   private final JsonCodec json;
   private final JobTransitionPolicy policy;
   private final OutboxRepository outbox;
+  private final ApplicationEventPublisher changes;
   private static final Set<String> PATCH_COLUMNS =
       Set.of(
           "stage",
@@ -53,11 +56,16 @@ public class JobRepository {
           "mock_json");
 
   public JobRepository(
-      JdbcTemplate jdbc, JsonCodec json, JobTransitionPolicy policy, OutboxRepository outbox) {
+      JdbcTemplate jdbc,
+      JsonCodec json,
+      JobTransitionPolicy policy,
+      OutboxRepository outbox,
+      ApplicationEventPublisher changes) {
     this.jdbc = jdbc;
     this.json = json;
     this.policy = policy;
     this.outbox = outbox;
+    this.changes = changes;
   }
 
   public Map<String, Object> findByNo(String jobNo) {
@@ -160,7 +168,9 @@ public class JobRepository {
     }
     int updated =
         jdbc.update(
-            "UPDATE cae_job SET status=?,stage=?,version=version+1,updated_at=CURRENT_TIMESTAMP(6) WHERE id=? AND status=? AND version=?",
+            "UPDATE cae_job SET status=?,stage=?,"
+                + (target == JobStatus.QUEUED ? "queued_at=UTC_TIMESTAMP(6)," : "")
+                + "version=version+1,updated_at=CURRENT_TIMESTAMP(6) WHERE id=? AND status=? AND version=?",
             target.name(),
             stage(target),
             job.id(),
@@ -168,6 +178,9 @@ public class JobRepository {
             job.version());
     if (updated != 1) throw ApiException.conflict("Job changed concurrently; refresh its state");
     event(job.id(), eventType, from.name(), target.name(), detail);
+    changes.publishEvent(
+        new JobChanged(
+            expected.get("jobNo").toString(), ((Number) expected.get("version")).longValue() + 1));
     return findById(job.id());
   }
 
@@ -204,6 +217,9 @@ public class JobRepository {
             values.toArray());
     if (updated != 1)
       throw ApiException.conflict("Job metadata changed concurrently; refresh its state");
+    changes.publishEvent(
+        new JobChanged(
+            expected.get("jobNo").toString(), ((Number) expected.get("version")).longValue() + 1));
     return findById(id);
   }
 

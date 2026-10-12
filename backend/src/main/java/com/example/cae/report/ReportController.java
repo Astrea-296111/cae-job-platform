@@ -1,9 +1,5 @@
 package com.example.cae.report;
 
-import com.example.cae.auth.ProjectAccess;
-import com.example.cae.common.SqlRows;
-import com.example.cae.job.repository.JobRepository;
-import com.example.cae.result.ResultRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
@@ -16,26 +12,18 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1")
 public class ReportController {
-  private final ReportApplicationService reports;
-  private final JobRepository jobs;
-  private final ProjectAccess access;
-  private final ResultRepository results;
-  private final PipelineRepository repository;
-  private final BaselineComparisonService comparisons;
+  @GetMapping("/jobs/{jobNo}/baselines")
+  public List<Map<String, Object>> baselines(
+      Authentication user,
+      @PathVariable String jobNo,
+      @RequestParam(defaultValue = "v1") String parserVersion) {
+    return reports.baselines(user, jobNo, parserVersion);
+  }
 
-  public ReportController(
-      ReportApplicationService reports,
-      JobRepository jobs,
-      ProjectAccess access,
-      ResultRepository results,
-      PipelineRepository repository,
-      BaselineComparisonService comparisons) {
+  private final ReportApplicationService reports;
+
+  public ReportController(ReportApplicationService reports) {
     this.reports = reports;
-    this.jobs = jobs;
-    this.access = access;
-    this.results = results;
-    this.repository = repository;
-    this.comparisons = comparisons;
   }
 
   @GetMapping("/reports")
@@ -89,28 +77,7 @@ public class ReportController {
       @PathVariable String jobNo,
       @RequestParam(defaultValue = "v1") String parserVersion,
       @RequestParam(required = false) String baselineJobNo) {
-    var job = jobs.findByNo(jobNo);
-    access.requireJob(user, job);
-    if (baselineJobNo != null) access.requireJob(user, jobs.findByNo(baselineJobNo));
-    var parse =
-        results
-            .find(SqlRows.id(job), parserVersion)
-            .orElseThrow(() -> com.example.cae.common.ApiException.notFound("Parser version"));
-    var base = repository.baseline(job, parse, baselineJobNo);
-    if (baselineJobNo != null && base.isEmpty())
-      throw com.example.cae.common.ApiException.invalid("Baseline is incompatible");
-    var response = new java.util.LinkedHashMap<String, Object>();
-    response.put(
-        "baseline",
-        base.isEmpty()
-            ? null
-            : Map.of("jobNo", base.get().get("jobNo"), "parseRecordId", SqlRows.id(base.get())));
-    response.put(
-        "comparisons",
-        comparisons.compare(
-            repository.metrics(SqlRows.id(parse)),
-            base.isEmpty() ? List.of() : repository.metrics(SqlRows.id(base.get()))));
-    return response;
+    return reports.comparison(user, jobNo, parserVersion, baselineJobNo);
   }
 
   public record GenerateRequest(

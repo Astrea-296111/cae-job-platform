@@ -22,8 +22,10 @@ public class JobController {
   @PostMapping
   @ResponseStatus(HttpStatus.ACCEPTED)
   public Map<String, Object> create(
-      Authentication user, @Valid @RequestBody CreateJobRequest request) {
-    Map<String, Object> job = jobs.create(user, request);
+      Authentication user,
+      @Valid @RequestBody CreateJobRequest request,
+      @RequestHeader(value = "Idempotency-Key", required = false) String key) {
+    Map<String, Object> job = jobs.create(user, request, key);
     String number = job.get("jobNo").toString();
     return Map.of(
         "jobNo",

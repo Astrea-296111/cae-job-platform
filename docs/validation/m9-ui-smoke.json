@@ -1,0 +1,36 @@
+{
+  "scenario": "M9 real browser acceptance",
+  "jobs": [
+    {
+      "jobNo": "CAE-20261012-000104",
+      "executionId": 27,
+      "metrics": 7,
+      "images": 4,
+      "pptx": ".local/acceptance/m9/CAE-20261012-000104_v1_report-v1.pptx",
+      "sha256": "bbc604ec66a0a5e07bfcd782f6c1edb2e47a5ed2bd657f4e3b5f1c3e6f0675e9"
+    },
+    {
+      "jobNo": "CAE-20261012-000105",
+      "executionId": 28,
+      "metrics": 7,
+      "images": 4,
+      "pptx": ".local/acceptance/m9/CAE-20261012-000105_v1_report-v1.pptx",
+      "sha256": "637a968a214ab326763aa7174574cda8325dfd07a6e87fb8a859595af6b72533"
+    }
+  ],
+  "checks": {
+    "uiV2ReparsePreservesV1AndExecution": true,
+    "acceptedResponseLostSameJob": true,
+    "engineerHidesAdminControls": true,
+    "explicitBaselineAndNewDraftNoSolver": {
+      "jobNo": "CAE-20261012-000104",
+      "baseline": "CAE-20261012-000102"
+    },
+    "manualRoleReviewAndApproval": true,
+    "adminDrainAndProfileDialog": true,
+    "mobile390px": true,
+    "authenticatedSse200": 2,
+    "noPageErrors": true,
+    "noPersistentCredentials": true
+  }
+}

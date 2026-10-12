@@ -14,6 +14,37 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class PipelineRepository {
+  public List<Map<String, Object>> baselines(Map<String, Object> job, Map<String, Object> parse) {
+    return jdbc.query(
+        "SELECT j.job_no,j.id AS job_id,p.id AS parse_record_id,r.revision AS model_revision,j.created_at FROM cae_result_parse_record p JOIN cae_job j ON j.id=p.job_id JOIN cae_model_revision r ON r.id=j.model_revision_id WHERE j.status='SUCCESS' AND j.id<>? AND j.project_id=? AND r.model_id=(SELECT model_id FROM cae_model_revision WHERE id=?) AND j.analysis_type=? AND j.condition_code=? AND p.status='COMPLETE' AND p.parser_version=? AND p.subcase=? AND p.execution_id=j.current_execution_id ORDER BY j.id DESC LIMIT 100",
+        SqlRows.MAPPER,
+        SqlRows.id(job),
+        job.get("projectId"),
+        job.get("modelRevisionId"),
+        job.get("analysisType"),
+        job.get("conditionCode"),
+        parse.get("parserVersion"),
+        parse.get("subcase"));
+  }
+
+  public List<Map<String, Object>> templates() {
+    return jdbc.query("SELECT * FROM cae_report_template ORDER BY code", SqlRows.MAPPER);
+  }
+
+  public void template(String code, boolean enabled) {
+    if (jdbc.update(
+            "UPDATE cae_report_template SET enabled=? WHERE code=? AND version='v1'", enabled, code)
+        != 1) throw ApiException.notFound("Report template");
+  }
+
+  public boolean templateEnabled(String code) {
+    return jdbc.queryForObject(
+            "SELECT COUNT(*) FROM cae_report_template WHERE code=? AND version='v1' AND enabled=TRUE",
+            Integer.class,
+            code)
+        == 1;
+  }
+
   public Optional<Map<String, Object>> intent(long job, String key) {
     return jdbc
         .query(

@@ -13,6 +13,8 @@ from agents.heartbeat import heartbeat_loop
 from app.agent_api import router
 from app.errors import AgentError
 from app.settings import Settings
+from post.api import router as render_router
+from post.service import RenderService
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -23,6 +25,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(application: FastAPI):
         application.state.settings = settings
         application.state.manager = ExecutionManager(settings)
+        application.state.render_service = RenderService(settings)
+        application.state.render_slots = asyncio.Semaphore(2)
         application.state.heartbeat_control = {"enabled": True}
         application.state.heartbeat_task = asyncio.create_task(
             heartbeat_loop(application.state.manager, application.state.heartbeat_control),
@@ -49,6 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     application.include_router(router)
+    application.include_router(render_router)
 
     @application.exception_handler(AgentError)
     async def agent_error(_request: Request, error: AgentError):

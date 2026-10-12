@@ -73,7 +73,7 @@ public class DefaultJobTransitionPolicy implements JobTransitionPolicy {
     allow(JobStatus.SUBMIT_FAILED, JobStatus.READY);
     allow(JobStatus.RUNTIME_FAILED, JobStatus.READY);
     allow(JobStatus.POST_PROCESS_FAILED, JobStatus.POST_PROCESSING);
-    allow(JobStatus.REPORT_FAILED, JobStatus.REPORTING);
+    allow(JobStatus.REPORT_FAILED, JobStatus.REPORTING, JobStatus.POST_PROCESSING);
     allow(JobStatus.CANCELLED, JobStatus.READY, JobStatus.VALIDATING);
   }
 

@@ -8,6 +8,7 @@ import com.example.cae.job.domain.JobStatus;
 import com.example.cae.job.repository.JobRepository;
 import com.example.cae.job.validation.CaseValidationService;
 import com.example.cae.job.validation.InputSnapshotService;
+import com.example.cae.report.PipelineService;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
@@ -32,6 +33,7 @@ public class JobCommandService {
   private final TransactionTemplate tx;
   private final JdbcTemplate jdbc;
   private final JsonCodec json;
+  private final PipelineService pipeline;
 
   public JobCommandService(
       JobRepository jobs,
@@ -40,7 +42,8 @@ public class JobCommandService {
       InputSnapshotService snapshots,
       TransactionTemplate tx,
       JdbcTemplate jdbc,
-      JsonCodec json) {
+      JsonCodec json,
+      PipelineService pipeline) {
     this.jobs = jobs;
     this.access = access;
     this.validation = validation;
@@ -48,6 +51,7 @@ public class JobCommandService {
     this.tx = tx;
     this.jdbc = jdbc;
     this.json = json;
+    this.pipeline = pipeline;
   }
 
   public Map<String, Object> submit(Authentication user, String jobNo, SubmissionRequest request) {
@@ -120,6 +124,12 @@ public class JobCommandService {
                       JobStatus.CANCELLED)
                   .contains(state))
             throw ApiException.conflict("Job has no retryable failed stage");
+          if (state == JobStatus.POST_PROCESS_FAILED || state == JobStatus.REPORT_FAILED) {
+            if (override != null)
+              throw ApiException.conflict("Stage retry cannot change Solver options");
+            record(current, key, operation, fingerprint, user.getName());
+            return pipeline.retryLocked(current, user.getName());
+          }
           if (override != null) current = jobs.patch(current, Map.of("mockJson", override));
           MockExecutionOptions.validate(json.readMap(current.get("mock")));
           record(current, key, operation, fingerprint, user.getName());
@@ -133,10 +143,6 @@ public class JobCommandService {
                 "JOB_VALIDATION_REQUESTED",
                 Map.of("retry", retry, "idempotencyKey", key));
             return current;
-          }
-          if (state == JobStatus.POST_PROCESS_FAILED || state == JobStatus.REPORT_FAILED) {
-            throw ApiException.conflict(
-                "Stage retry is available when the report pipeline is installed");
           }
           snapshots.verifySnapshot(current);
           if (state != JobStatus.READY)

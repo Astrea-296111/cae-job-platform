@@ -102,6 +102,24 @@ public class InboxRepository {
 
   /** A concurrent delivery is durably deferred; it is neither dropped nor immediately requeued. */
   @Transactional
+  public void await(CommandEnvelope message, String consumer, String owner, Duration delay) {
+    Map<String, Object> row = locked(message, consumer);
+    if (!"PROCESSING".equals(row.get("status")) || !owner.equals(row.get("claimOwner")))
+      throw new LostLeaseException();
+    Instant retryAt = Instant.now().plus(delay);
+    outbox.appendRetry(
+        message,
+        ((Number) row.get("retryCount")).intValue(),
+        retryAt,
+        "Awaiting the existing stage lease");
+    jdbc.update(
+        "UPDATE cae_message_inbox SET status='RETRY',claim_owner=NULL,claim_until=NULL,next_retry_time=?,updated_at=UTC_TIMESTAMP(6) WHERE id=?",
+        Timestamp.from(retryAt),
+        SqlRows.id(row));
+  }
+
+  /** A concurrent delivery is durably deferred; it is neither dropped nor immediately requeued. */
+  @Transactional
   public void defer(CommandEnvelope message, String consumer) {
     Map<String, Object> row = locked(message, consumer);
     if (List.of("DONE", "DEAD").contains(row.get("status"))) return;

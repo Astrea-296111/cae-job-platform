@@ -1,0 +1,18 @@
+{
+  "payload": {
+    "context": {
+      "projectName": "公开复现",
+      "maturity": "COMPLETE"
+    },
+    "metrics": [
+      {
+        "metricCode": "MASS",
+        "valueNum": "315.125",
+        "valueText": null
+      }
+    ],
+    "parseRecordId": 42,
+    "schemaVersion": 1
+  },
+  "sha256": "2247156dd545391cb84f8937c40aefd4bd018850598a9a232e21892c269e5e4f"
+}

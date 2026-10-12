@@ -15,6 +15,7 @@ import com.example.cae.job.execution.ExecutionRepository;
 import com.example.cae.job.repository.JobRepository;
 import com.example.cae.job.validation.InputSnapshotService;
 import com.example.cae.monitoring.RemoteExecutionStateService;
+import com.example.cae.report.PipelineBinding;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -39,6 +40,7 @@ public class ResultParsingService {
   private final ArtifactFileStore files;
   private final InputSnapshotService snapshots;
   private final RemoteExecutionStateService remoteStates;
+  private final PipelineBinding pipelineBinding;
   private final ProjectAccess access;
   private final JsonCodec json;
   private final TransactionTemplate tx;
@@ -52,6 +54,7 @@ public class ResultParsingService {
       ArtifactFileStore files,
       InputSnapshotService snapshots,
       RemoteExecutionStateService remoteStates,
+      PipelineBinding pipelineBinding,
       ProjectAccess access,
       JsonCodec json,
       TransactionTemplate tx) {
@@ -63,6 +66,7 @@ public class ResultParsingService {
     this.files = files;
     this.snapshots = snapshots;
     this.remoteStates = remoteStates;
+    this.pipelineBinding = pipelineBinding;
     this.access = access;
     this.json = json;
     this.tx = tx;
@@ -250,18 +254,7 @@ public class ResultParsingService {
           artifact.contentType(),
           metadata);
     }
-    if ("POST_PROCESS_FAILED".equals(job.get("status"))) {
-      Map<String, Object> clear = new LinkedHashMap<>();
-      clear.put("failureCode", null);
-      clear.put("failureMessage", null);
-      job = jobs.patch(job, clear);
-      job =
-          jobs.transition(
-              job,
-              JobStatus.POST_PROCESSING,
-              "RESULT_PARSE_RECOVERED",
-              Map.of("parseRecordId", parseId, "parserVersion", version));
-    }
+    job = pipelineBinding.completed(job, record);
     jobs.recordEvent(
         jobId,
         "RESULT_PARSED",
@@ -469,7 +462,9 @@ public class ResultParsingService {
               "RESULT_PARSE_FAILED",
               Map.of(
                   "executionId", executionId, "parserVersion", version, "reason", bounded(reason)));
-          if ("POST_PROCESSING".equals(job.get("status"))) {
+          if ("POST_PROCESSING".equals(job.get("status"))
+              && pipelineBinding.canFailParse(
+                  job, SqlRows.id(results.find(jobId, version).orElseThrow()))) {
             job =
                 jobs.patch(
                     job,

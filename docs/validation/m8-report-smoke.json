@@ -1,0 +1,273 @@
+{
+  "baseline": {
+    "jobNo": "CAE-20261012-000092",
+    "parserVersion": "v1",
+    "reportVersion": 1,
+    "reportId": 6,
+    "conditionCode": "BIW_TORSION",
+    "subcase": 1,
+    "slides": 5,
+    "canonicalMetrics": 7,
+    "pptxSha256": "c7881d452181f00ac1e1394e6df2d2483a36aca18acc342085c1b2cca2f76d33",
+    "imageSha256": [
+      "28ad54d17180260e0ecd290c8c8a33188fa6e24d0300dcf0b25daa17a0422253",
+      "56c93aed4dfe7a3c2162368b290bf6e3c8e531513fa5e7a5c18e1c4808114786",
+      "678fea224496ca8d2ac38c07b7324351a3501fdb7af06edf66162f70fbf5fb12",
+      "795ff54198a76e5f2635e006e4a1b02864350f580203d0620ab229665faf1857"
+    ],
+    "localArtifacts": ".local/acceptance/CAE-20261012-000092/v1/report-v1"
+  },
+  "current": {
+    "jobNo": "CAE-20261012-000093",
+    "parserVersion": "v1",
+    "reportVersion": 1,
+    "reportId": 7,
+    "conditionCode": "BIW_TORSION",
+    "subcase": 1,
+    "slides": 5,
+    "canonicalMetrics": 7,
+    "pptxSha256": "4bea9bde5167d406fd9f3df407ae2bb915be44b804dcee7080f61dc57a3d1342",
+    "imageSha256": [
+      "04c05aabc86df89d9ef20a6b14db72e9f4e867450d3ae52e6fdcc0fece1e90e8",
+      "3916461395c834c2c66b9db694dc81b1cb21305af8ce7cce8a6ae01d4721b97e",
+      "3bdd37a657017d418d099ee58b6bc2c1c01ad4a95e23cf5eb42e309a9eb1acde",
+      "6883620a150db29525936971d2e2d9824a142a071874065d9eb55967b4ab9186"
+    ],
+    "localArtifacts": ".local/acceptance/CAE-20261012-000093/v1/report-v1"
+  },
+  "modal": {
+    "jobNo": "CAE-20261012-000094",
+    "parserVersion": "v1",
+    "reportVersion": 1,
+    "reportId": 8,
+    "conditionCode": "BIW_MODAL",
+    "subcase": 2,
+    "slides": 5,
+    "canonicalMetrics": 7,
+    "pptxSha256": "b2314191dc99cf566c3271d593a1e3cdac1b42f29803aeab8d8bb0fe24791149",
+    "imageSha256": [
+      "6d5b6ab6c8f864af48edba9051f53a91e6c2b3130cdc719bbc6f33ea46389421",
+      "74cfe29eaf6468b884d11ac768795461e9436477c6414e1f957cf995e0b06839",
+      "84f6bccf167eecd240ef3cc9250c838c16e7e90e373536ab65a5e890aa46ea46",
+      "e68317792f751fe13e3764e3b057b6aa2a5ea0c13c35e0f9e4ed1ee16e0f47d8"
+    ],
+    "localArtifacts": ".local/acceptance/CAE-20261012-000094/v1/report-v1"
+  },
+  "reparseV2": {
+    "jobNo": "CAE-20261012-000093",
+    "parserVersion": "v2",
+    "reportVersion": 1,
+    "reportId": 9,
+    "conditionCode": "BIW_TORSION",
+    "subcase": 1,
+    "slides": 5,
+    "canonicalMetrics": 7,
+    "pptxSha256": "4a0d066439a3a4d581790cff9da574a51cf197eb7ba078bfde58f03ede6f8e0c",
+    "imageSha256": [
+      "2fc4b9c8a3e075c0afa626360d2d1f837e76b560e25dc9f6ad45db2a23977abc",
+      "6b6c61aebe0f2812d2e3b612337b14aedd99e6118fddc61bd0e631802657c904",
+      "802cfaf2f2fc5a77b4d4c235f0b9748b60e5f2ab9110b8cbcd6102c8e04d21ba",
+      "d0dbe0f0fed3a962aa288215099f6d44612974f58af50b821448c06778c91bec"
+    ],
+    "localArtifacts": ".local/acceptance/CAE-20261012-000093/v2/report-v1"
+  },
+  "newDraft": {
+    "jobNo": "CAE-20261012-000093",
+    "parserVersion": "v1",
+    "reportVersion": 2,
+    "reportId": 10,
+    "conditionCode": "BIW_TORSION",
+    "subcase": 1,
+    "slides": 5,
+    "canonicalMetrics": 7,
+    "pptxSha256": "e99ebec1b5d0002a4b0a6f0a862fbf1712c1b65fa5ef6b1dc0e312ac4a6b8e3e",
+    "imageSha256": [
+      "04c05aabc86df89d9ef20a6b14db72e9f4e867450d3ae52e6fdcc0fece1e90e8",
+      "3916461395c834c2c66b9db694dc81b1cb21305af8ce7cce8a6ae01d4721b97e",
+      "3bdd37a657017d418d099ee58b6bc2c1c01ad4a95e23cf5eb42e309a9eb1acde",
+      "6883620a150db29525936971d2e2d9824a142a071874065d9eb55967b4ab9186"
+    ],
+    "localArtifacts": ".local/acceptance/CAE-20261012-000093/v1/report-v2"
+  },
+  "postRetry": {
+    "jobNo": "CAE-20261012-000095",
+    "failedStage": "post",
+    "logicalEventId": "evt-171e0da2-405a-426e-8c8c-3cbd4499b674",
+    "boundedAttempts": 4,
+    "sameExecutionId": 18,
+    "sameProcessIdentity": "109:1791779633.830000",
+    "postImagesPreserved": false,
+    "reportId": 11,
+    "validation": {
+      "jobNo": "CAE-20261012-000095",
+      "parserVersion": "v1",
+      "reportVersion": 1,
+      "reportId": 11,
+      "conditionCode": "BIW_TORSION",
+      "subcase": 1,
+      "slides": 5,
+      "canonicalMetrics": 7,
+      "pptxSha256": "5a4eaf7f058387cf37f29002d465633b32025cbf6014bc65f48f46627ef5cdfa",
+      "imageSha256": [
+        "04c05aabc86df89d9ef20a6b14db72e9f4e867450d3ae52e6fdcc0fece1e90e8",
+        "3916461395c834c2c66b9db694dc81b1cb21305af8ce7cce8a6ae01d4721b97e",
+        "3bdd37a657017d418d099ee58b6bc2c1c01ad4a95e23cf5eb42e309a9eb1acde",
+        "7cebf45d84e9cff149535958d73ea81473e7b6dff8592c3dfd5d8057a60515fe"
+      ],
+      "localArtifacts": ".local/acceptance/CAE-20261012-000095/v1/report-v1"
+    }
+  },
+  "reportRetry": {
+    "jobNo": "CAE-20261012-000096",
+    "failedStage": "report",
+    "logicalEventId": "evt-1723a65b-7ccd-43cf-8a04-b6064a1500e9",
+    "boundedAttempts": 4,
+    "sameExecutionId": 19,
+    "sameProcessIdentity": "116:1791779647.130000",
+    "postImagesPreserved": true,
+    "reportId": 12,
+    "validation": {
+      "jobNo": "CAE-20261012-000096",
+      "parserVersion": "v1",
+      "reportVersion": 1,
+      "reportId": 12,
+      "conditionCode": "BIW_MODAL",
+      "subcase": 2,
+      "slides": 5,
+      "canonicalMetrics": 7,
+      "pptxSha256": "8c3ae49c16295a9cd408a48ac1c827b6195fdab91345de8fba4717b7b03fe3ba",
+      "imageSha256": [
+        "6d5b6ab6c8f864af48edba9051f53a91e6c2b3130cdc719bbc6f33ea46389421",
+        "84f6bccf167eecd240ef3cc9250c838c16e7e90e373536ab65a5e890aa46ea46",
+        "e68317792f751fe13e3764e3b057b6aa2a5ea0c13c35e0f9e4ed1ee16e0f47d8",
+        "ed5d07eca91f92ef9e30ac3675d2a0d02dde5b1340179dec51143b6f70c078fa"
+      ],
+      "localArtifacts": ".local/acceptance/CAE-20261012-000096/v1/report-v1"
+    }
+  },
+  "backendRestart": {
+    "jobNo": "CAE-20261012-000097",
+    "sameExecutionId": 20,
+    "sameProcessIdentity": "141:1791779660.940000",
+    "workerContainersUnchanged": true,
+    "postHashesAndMtimesUnchanged": true,
+    "reclaimedStageLease": true,
+    "validation": {
+      "jobNo": "CAE-20261012-000097",
+      "parserVersion": "v1",
+      "reportVersion": 1,
+      "reportId": 13,
+      "conditionCode": "BIW_TORSION",
+      "subcase": 1,
+      "slides": 5,
+      "canonicalMetrics": 7,
+      "pptxSha256": "a6d4e65c37d28e60904f4816c0d647b90d521b09adbdbbe52d020a2a07dd7f4c",
+      "imageSha256": [
+        "04c05aabc86df89d9ef20a6b14db72e9f4e867450d3ae52e6fdcc0fece1e90e8",
+        "3916461395c834c2c66b9db694dc81b1cb21305af8ce7cce8a6ae01d4721b97e",
+        "3bdd37a657017d418d099ee58b6bc2c1c01ad4a95e23cf5eb42e309a9eb1acde",
+        "7cebf45d84e9cff149535958d73ea81473e7b6dff8592c3dfd5d8057a60515fe"
+      ],
+      "localArtifacts": ".local/acceptance/CAE-20261012-000097/v1/report-v1"
+    }
+  },
+  "milestone": 8,
+  "historicalDeadLetterPreserved": "m5-invalid-bb982f6e59bf4dbabebcb1e7c566e13d",
+  "licenseLedgerReturnedToBaseline": true,
+  "realSolverJobCount": 6,
+  "sameCurrentExecutionId": 16,
+  "upgradeBacklogRecovered": [
+    {
+      "jobNo": "CAE-20261011-000083",
+      "sameExecutionId": 6,
+      "sameProcessIdentity": "223:1791692610.170000",
+      "validation": {
+        "jobNo": "CAE-20261011-000083",
+        "parserVersion": "v1",
+        "reportVersion": 1,
+        "reportId": 14,
+        "conditionCode": "BIW_TORSION",
+        "subcase": 1,
+        "slides": 5,
+        "canonicalMetrics": 7,
+        "pptxSha256": "a5e2ca83e72ca3d0aef3cab76910743e5a6d362fdd51b6367295bba00e25f322",
+        "imageSha256": [
+          "07ef130a5fd35abaab9b2d1e581640b34400a8184c5b3623321f4081f2809d79",
+          "750e502aa68da06d6d00999919db65ecdd5a06ea25c0ca522140daf679462427",
+          "cfe4ea6d81a2a601839530c3ea75953c00fa1208c5adfd3f11c8d3e45ce9f994",
+          "e7b775dba3e94692eb518482671d8109fcc91f9b4234f2ec6a988cc9be4eed8a"
+        ],
+        "localArtifacts": ".local/acceptance/CAE-20261011-000083/v1/report-v1"
+      }
+    },
+    {
+      "jobNo": "CAE-20261011-000089",
+      "sameExecutionId": 12,
+      "sameProcessIdentity": "82:1791694027.120000",
+      "validation": {
+        "jobNo": "CAE-20261011-000089",
+        "parserVersion": "v1",
+        "reportVersion": 1,
+        "reportId": 15,
+        "conditionCode": "CABIN_NVH",
+        "subcase": 1,
+        "slides": 5,
+        "canonicalMetrics": 2,
+        "pptxSha256": "d5a119cf9fbfd77fe03c465a1dc15240200703102ae2ba10ff9c37f0fa620469",
+        "imageSha256": [
+          "3f077d1515d1d45573ec6b16c73de1349b760528e005e4fd07bbe60092161bb9",
+          "72d646f8e631e4546bbabbf8503ee2efc2ceedc4f29f65a80b291e16a41d3d52",
+          "99a2f0a2ab0a0d451af1bdab7a70bed709dcb65780354c84e54cc070dc3f3ee1",
+          "de36094edcc83b4756305adb9a4146c09dcd3b90f4a4c76b19a7b34b553575a3"
+        ],
+        "localArtifacts": ".local/acceptance/CAE-20261011-000089/v1/report-v1"
+      }
+    },
+    {
+      "jobNo": "CAE-20261011-000090",
+      "sameExecutionId": 13,
+      "sameProcessIdentity": "79:1791694033.340000",
+      "validation": {
+        "jobNo": "CAE-20261011-000090",
+        "parserVersion": "v1",
+        "reportVersion": 1,
+        "reportId": 16,
+        "conditionCode": "FRONTAL_CRASH",
+        "subcase": 1,
+        "slides": 5,
+        "canonicalMetrics": 3,
+        "pptxSha256": "ee4b6c61361e1c59e7123ba3d373b1c5b5f88b6ba2b138102fd894e80293fe6c",
+        "imageSha256": [
+          "0a900e4a788659e98c7bda90ed6546b7e5e7683c548d87f767a9b1f131cbf4fe",
+          "121272a3fd428825e5a57395953f39b7eb72f42c828c6eed1e1611ee4d6c5982",
+          "8c8806442d3f1fecae92e2d1407eeb3bdf7e40b4fc22dcacb25d9051e4cf5b28",
+          "c7d5bfd6a3b24b625024ae3c53632880f08e48ad97e2c1142ca033aa4cba5128"
+        ],
+        "localArtifacts": ".local/acceptance/CAE-20261011-000090/v1/report-v1"
+      }
+    }
+  ],
+  "finalNodeLedger": [
+    {
+      "nodeId": "node-a",
+      "cpuUsed": 0,
+      "cpuReserved": 0,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0
+    },
+    {
+      "nodeId": "node-b",
+      "cpuUsed": 0,
+      "cpuReserved": 0,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0
+    },
+    {
+      "nodeId": "node-c",
+      "cpuUsed": 0,
+      "cpuReserved": 0,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0
+    }
+  ]
+}

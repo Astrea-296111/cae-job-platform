@@ -18,6 +18,7 @@ COPY app ./app
 COPY agents ./agents
 COPY adapters ./adapters
 COPY mock_solver ./mock_solver
+COPY post ./post
 
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \

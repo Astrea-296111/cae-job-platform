@@ -96,6 +96,7 @@ public class ExecutionMonitor {
       String nodeId = execution.get("nodeId").toString();
       if (states.nodeOffline(nodeId)) {
         failure = "Node heartbeat is unavailable; capacity is retained";
+        if (awaitingSubmitDelivery(execution)) return;
         states.unknown(claim.executionId(), "NODE_OFFLINE", failure, claim);
         return;
       }
@@ -109,6 +110,12 @@ public class ExecutionMonitor {
           && !RemoteExecutionStateService.TERMINAL.contains(remote.get("state")))
         cancellation.continueCancel(claim.jobId());
     } catch (AgentException error) {
+      if (awaitingSubmitDelivery(executions.find(claim.executionId()))) {
+        // A queued/in-flight submit has no receipt yet. Its durable consumer owns bounded retries.
+        // Turning it UNKNOWN here would prevent that original command from ever being sent.
+        failure = "Awaiting original submit delivery: " + error.code();
+        return;
+      }
       failure =
           error.notFound()
               ? "Agent has no matching execution; absence does not prove the solver stopped"
@@ -130,6 +137,11 @@ public class ExecutionMonitor {
     } finally {
       leases.finish(claim, pollDelay, failure);
     }
+  }
+
+  private static boolean awaitingSubmitDelivery(Map<String, Object> execution) {
+    return "SUBMITTING".equals(execution.get("status"))
+        && execution.get("externalExecutionId") == null;
   }
 
   private static void checkWalltime(Map<String, Object> execution, Map<String, Object> remote) {

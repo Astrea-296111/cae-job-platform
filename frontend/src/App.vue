@@ -3,7 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSessionStore } from './stores/session'
 const router = useRouter(); const route = useRoute(); const session = useSessionStore()
-const links = [{to:'/',label:'总览',icon:'◈'},{to:'/jobs',label:'仿真任务',icon:'▤'},{to:'/compute-nodes',label:'计算资源',icon:'▦'},{to:'/reports',label:'报告中心',icon:'▧'}]
+const links = [{to:'/',label:'总览',icon:'◈'},{to:'/jobs',label:'仿真任务',icon:'▤'},{to:'/compute-nodes',label:'计算资源',icon:'▦'},{to:'/batches',label:'批量仿真',icon:'▥'},{to:'/reports',label:'报告中心',icon:'▧'}]
 function logout() { session.logout(); void router.replace('/login') }
 onMounted(() => window.addEventListener('cae-session-expired', logout))
 onUnmounted(() => window.removeEventListener('cae-session-expired', logout))

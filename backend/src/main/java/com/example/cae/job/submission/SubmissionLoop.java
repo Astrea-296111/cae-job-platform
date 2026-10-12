@@ -1,7 +1,5 @@
 package com.example.cae.job.submission;
 
-import com.example.cae.common.SqlRows;
-import com.example.cae.job.domain.JobStatus;
 import com.example.cae.job.repository.JobRepository;
 import jakarta.annotation.PreDestroy;
 import java.util.Set;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubmissionLoop {
   private static final Logger LOG = LoggerFactory.getLogger(SubmissionLoop.class);
+  private final FairAdmissionRepository admission;
   private final JobRepository jobs;
   private final JobCommandService commands;
   private final JobAllocationService allocation;
@@ -28,11 +27,13 @@ public class SubmissionLoop {
 
   public SubmissionLoop(
       JobRepository jobs,
+      FairAdmissionRepository admission,
       JobCommandService commands,
       JobAllocationService allocation,
       JobCancellationService cancellation,
       @Value("${cae.background.enabled:true}") boolean enabled) {
     this.jobs = jobs;
+    this.admission = admission;
     this.commands = commands;
     this.allocation = allocation;
     this.cancellation = cancellation;
@@ -43,11 +44,8 @@ public class SubmissionLoop {
   public void scan() {
     if (!enabled) return;
     commands.pendingValidation().stream().limit(8).forEach(this::dispatch);
-    jobs
-        .listByStatus(JobStatus.QUEUED, JobStatus.WAITING_RESOURCE, JobStatus.CANCEL_REQUESTED)
-        .stream()
-        .limit(12)
-        .forEach(job -> dispatch(SqlRows.id(job)));
+    admission.cancellations().forEach(this::dispatch);
+    admission.waiting(12).forEach(this::dispatch);
   }
 
   private void dispatch(long id) {

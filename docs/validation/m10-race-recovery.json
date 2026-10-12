@@ -1,0 +1,32 @@
+{
+  "scenario": "premature negative reconciliation before command publication",
+  "events": [
+    {
+      "type": "EXECUTION_SUBMIT_REQUESTED",
+      "createdAtUtc": "2026-10-12 06:16:18.598535",
+      "publishedAtUtc": "2026-10-12 06:16:19.115349"
+    },
+    {
+      "type": "REMOTE_STATE_UNKNOWN",
+      "createdAtUtc": "2026-10-12 06:16:18.896816",
+      "publishedAtUtc": "2026-10-12 06:16:19.130003"
+    }
+  ],
+  "repair": "Submit the original immutable request with the same executionRequestId after proving publication followed the premature UNKNOWN; no fresh attempt or capacity release",
+  "jobNo": "CAE-20261012-000137",
+  "executionId": 54,
+  "attemptCount": 1,
+  "pid": 8298,
+  "processIdentity": "8298:1791793554.410000",
+  "finalStatus": "SUCCESS",
+  "batchNo": "BATCH-26987d76-be39-4c37-9384-a5df9cf8e32d",
+  "batchCounts": {
+    "cancelled": 0,
+    "waiting": 0,
+    "failed": 3,
+    "success": 37,
+    "total": 40,
+    "running": 0
+  },
+  "regression": "ExecutionMonitoringIntegrationTest.missingReceiptBeforeSubmitDeliveryDoesNotDisableTheOriginalCommand"
+}

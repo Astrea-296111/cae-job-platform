@@ -10,6 +10,8 @@ const router = createRouter({
     { path: '/jobs/new', component: () => import('./views/CreateJobView.vue') },
     { path: '/jobs/:jobNo', component: () => import('./views/JobDetailView.vue') },
     { path: '/compute-nodes', component: () => import('./views/NodesView.vue') },
+    { path: '/batches', component: () => import('./views/BatchView.vue') },
+    { path: '/batches/:batchNo', component: () => import('./views/BatchView.vue') },
     { path: '/reports', component: () => import('./views/ReportsView.vue') },
     { path: '/:pathMatch(.*)*', component: () => import('./views/NotFoundView.vue') },
   ],

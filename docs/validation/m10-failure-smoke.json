@@ -1,0 +1,1468 @@
+{
+  "scenario": "M10 twelve real E2E scenarios",
+  "results": [
+    {
+      "number": 1,
+      "scenario": "structure-success",
+      "passed": true,
+      "executionId": 78,
+      "report": {
+        "jobNo": "CAE-20261012-000158",
+        "parserVersion": "v1",
+        "reportVersion": 1,
+        "reportId": 75,
+        "conditionCode": "BIW_TORSION",
+        "subcase": 1,
+        "slides": 5,
+        "canonicalMetrics": 7,
+        "pptxSha256": "5b8aeee792187ad775e0dd751f4270cf6f55937a50ce605cde19891288ac5c7f",
+        "imageSha256": [
+          "04c05aabc86df89d9ef20a6b14db72e9f4e867450d3ae52e6fdcc0fece1e90e8",
+          "3916461395c834c2c66b9db694dc81b1cb21305af8ce7cce8a6ae01d4721b97e",
+          "3bdd37a657017d418d099ee58b6bc2c1c01ad4a95e23cf5eb42e309a9eb1acde",
+          "7cebf45d84e9cff149535958d73ea81473e7b6dff8592c3dfd5d8057a60515fe"
+        ],
+        "localArtifacts": ".local/acceptance/CAE-20261012-000158/v1/report-v1"
+      }
+    },
+    {
+      "number": 2,
+      "scenario": "missing-include-no-solver",
+      "passed": true,
+      "jobNo": "CAE-20261012-000159",
+      "failureCode": "INPUT_INCLUDE_MISSING"
+    },
+    {
+      "number": 3,
+      "scenario": "duplicate-submit-one-process",
+      "passed": true,
+      "jobNo": "CAE-20261012-000160",
+      "executionId": 79,
+      "pid": 8542
+    },
+    {
+      "number": 4,
+      "scenario": "accepted-response-timeout-one-process",
+      "passed": true,
+      "jobNo": "CAE-20261012-000161",
+      "executionId": 80,
+      "pid": 8549,
+      "deliveryEvidence": {
+        "outbox": [
+          {
+            "status": "SENT",
+            "eventId": "evt-db89c7a4-62da-41ab-bc57-8d350a1702c4",
+            "eventType": "JOB_SUBMIT_REQUESTED",
+            "retryCount": 0,
+            "routingKey": "job.submit",
+            "publishedAt": "2026-10-12 08:32:58.695002",
+            "logicalEventId": "evt-db89c7a4-62da-41ab-bc57-8d350a1702c4",
+            "deliveryAttempt": 0
+          },
+          {
+            "status": "SENT",
+            "eventId": "evt-2bd8400c-730d-4a1b-9f37-820bc7314dfe",
+            "eventType": "EXECUTION_SUBMIT_REQUESTED",
+            "retryCount": 0,
+            "routingKey": "job.submit",
+            "publishedAt": "2026-10-12 08:32:58.706668",
+            "logicalEventId": "evt-2bd8400c-730d-4a1b-9f37-820bc7314dfe",
+            "deliveryAttempt": 0
+          }
+        ],
+        "inbox": [
+          {
+            "status": "DONE",
+            "retryCount": 0,
+            "consumerName": "job-submit-v1",
+            "lastDeliveryId": "evt-2bd8400c-730d-4a1b-9f37-820bc7314dfe",
+            "logicalEventId": "evt-2bd8400c-730d-4a1b-9f37-820bc7314dfe"
+          },
+          {
+            "status": "DONE",
+            "retryCount": 0,
+            "consumerName": "job-submit-v1",
+            "lastDeliveryId": "evt-db89c7a4-62da-41ab-bc57-8d350a1702c4",
+            "logicalEventId": "evt-db89c7a4-62da-41ab-bc57-8d350a1702c4"
+          }
+        ]
+      },
+      "responseDelayOnceSeconds": 8,
+      "originalCommandReplayAcknowledged": true
+    },
+    {
+      "number": 5,
+      "scenario": "runtime-failure-with-log",
+      "passed": true,
+      "jobNo": "CAE-20261012-000162",
+      "failureCode": "SOLVER_RUNTIME_FAILED",
+      "rawSolverCode": "MOCK_NUMERICAL_FAILURE"
+    },
+    {
+      "number": 6,
+      "scenario": "resource-wait-auto-resume",
+      "passed": true,
+      "jobNo": "CAE-20261012-000163"
+    },
+    {
+      "number": 7,
+      "scenario": "offline-unknown-preserves-process-and-capacity",
+      "passed": true,
+      "jobNo": "CAE-20261012-000164",
+      "executionId": 83,
+      "pid": 8473
+    },
+    {
+      "number": 8,
+      "scenario": "cancel-race-confirmed-release",
+      "passed": true,
+      "jobNo": "CAE-20261012-000165",
+      "status": "CANCELLED",
+      "executionId": 84
+    },
+    {
+      "number": 9,
+      "scenario": "duplicate-parse-unique-records",
+      "passed": true,
+      "jobNo": "CAE-20261012-000158",
+      "metricCount": 7
+    },
+    {
+      "number": 10,
+      "scenario": "forty-child-partial-failure-batch",
+      "passed": true,
+      "batchNo": "BATCH-0da52b50-7903-408f-a0a5-09fe8e259288",
+      "counts": {
+        "failed": 3,
+        "success": 37,
+        "total": 40,
+        "running": 0,
+        "cancelled": 0,
+        "waiting": 0
+      },
+      "nodes": [
+        "node-a",
+        "node-b",
+        "node-c"
+      ],
+      "pausedSamples": 46,
+      "snapshots": [
+        {
+          "created": 1,
+          "paused": false,
+          "counts": {
+            "failed": 0,
+            "success": 0,
+            "total": 40,
+            "running": 0,
+            "cancelled": 0,
+            "waiting": 40
+          }
+        },
+        {
+          "created": 4,
+          "paused": false,
+          "counts": {
+            "failed": 0,
+            "success": 0,
+            "total": 40,
+            "running": 2,
+            "cancelled": 0,
+            "waiting": 38
+          }
+        },
+        {
+          "created": 6,
+          "paused": false,
+          "counts": {
+            "failed": 0,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 36
+          }
+        },
+        {
+          "created": 8,
+          "paused": false,
+          "counts": {
+            "failed": 0,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 36
+          }
+        },
+        {
+          "created": 10,
+          "paused": false,
+          "counts": {
+            "failed": 0,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 36
+          }
+        },
+        {
+          "created": 12,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 35
+          }
+        },
+        {
+          "created": 14,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 35
+          }
+        },
+        {
+          "created": 15,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 35
+          }
+        },
+        {
+          "created": 15,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 35
+          }
+        },
+        {
+          "created": 15,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 0,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 35
+          }
+        },
+        {
+          "created": 15,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 0,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 33
+          }
+        },
+        {
+          "created": 15,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 0,
+            "total": 40,
+            "running": 8,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 15,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 2,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 17,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 3,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 18,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 4,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 19,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 4,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 19,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 4,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 19,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 4,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 19,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 4,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 31
+          }
+        },
+        {
+          "created": 19,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 4,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 30
+          }
+        },
+        {
+          "created": 19,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 5,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 29
+          }
+        },
+        {
+          "created": 20,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 5,
+            "total": 40,
+            "running": 7,
+            "cancelled": 0,
+            "waiting": 27
+          }
+        },
+        {
+          "created": 20,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 7,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 27
+          }
+        },
+        {
+          "created": 22,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 8,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 27
+          }
+        },
+        {
+          "created": 23,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 8,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 27
+          }
+        },
+        {
+          "created": 23,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 8,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 27
+          }
+        },
+        {
+          "created": 23,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 8,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 27
+          }
+        },
+        {
+          "created": 23,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 8,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 27
+          }
+        },
+        {
+          "created": 23,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 8,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 26
+          }
+        },
+        {
+          "created": 24,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 9,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 25
+          }
+        },
+        {
+          "created": 24,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 10,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 23
+          }
+        },
+        {
+          "created": 25,
+          "paused": false,
+          "counts": {
+            "failed": 1,
+            "success": 11,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 23
+          }
+        },
+        {
+          "created": 27,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 12,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 23
+          }
+        },
+        {
+          "created": 27,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 12,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 23
+          }
+        },
+        {
+          "created": 27,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 12,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 23
+          }
+        },
+        {
+          "created": 27,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 12,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 23
+          }
+        },
+        {
+          "created": 27,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 12,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 22
+          }
+        },
+        {
+          "created": 27,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 12,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 22
+          }
+        },
+        {
+          "created": 28,
+          "paused": true,
+          "counts": {
+            "failed": 1,
+            "success": 13,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 21
+          }
+        },
+        {
+          "created": 30,
+          "paused": true,
+          "counts": {
+            "failed": 2,
+            "success": 14,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 20
+          }
+        },
+        {
+          "created": 31,
+          "paused": true,
+          "counts": {
+            "failed": 2,
+            "success": 15,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 19
+          }
+        },
+        {
+          "created": 31,
+          "paused": true,
+          "counts": {
+            "failed": 2,
+            "success": 15,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 19
+          }
+        },
+        {
+          "created": 31,
+          "paused": true,
+          "counts": {
+            "failed": 2,
+            "success": 15,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 19
+          }
+        },
+        {
+          "created": 31,
+          "paused": true,
+          "counts": {
+            "failed": 2,
+            "success": 15,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 19
+          }
+        },
+        {
+          "created": 31,
+          "paused": true,
+          "counts": {
+            "failed": 2,
+            "success": 15,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 19
+          }
+        },
+        {
+          "created": 31,
+          "paused": true,
+          "counts": {
+            "failed": 2,
+            "success": 15,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 18
+          }
+        },
+        {
+          "created": 31,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 16,
+            "total": 40,
+            "running": 3,
+            "cancelled": 0,
+            "waiting": 18
+          }
+        },
+        {
+          "created": 33,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 16,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 16
+          }
+        },
+        {
+          "created": 33,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 16,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 16
+          }
+        },
+        {
+          "created": 34,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 17,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 15
+          }
+        },
+        {
+          "created": 34,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 18,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 15
+          }
+        },
+        {
+          "created": 35,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 18,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 15
+          }
+        },
+        {
+          "created": 35,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 18,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 15
+          }
+        },
+        {
+          "created": 35,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 18,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 15
+          }
+        },
+        {
+          "created": 35,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 18,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 14
+          }
+        },
+        {
+          "created": 35,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 18,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 14
+          }
+        },
+        {
+          "created": 35,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 19,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 13
+          }
+        },
+        {
+          "created": 36,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 20,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 11
+          }
+        },
+        {
+          "created": 37,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 21,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 11
+          }
+        },
+        {
+          "created": 39,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 22,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 11
+          }
+        },
+        {
+          "created": 39,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 22,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 11
+          }
+        },
+        {
+          "created": 39,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 22,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 11
+          }
+        },
+        {
+          "created": 39,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 22,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 11
+          }
+        },
+        {
+          "created": 39,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 22,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 10
+          }
+        },
+        {
+          "created": 39,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 23,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 10
+          }
+        },
+        {
+          "created": 40,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 23,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 9
+          }
+        },
+        {
+          "created": 40,
+          "paused": true,
+          "counts": {
+            "failed": 3,
+            "success": 23,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 8
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 24,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 7
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 26,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 7
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 26,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 7
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 26,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 7
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 26,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 7
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 26,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 6
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 26,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 6
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 27,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 6
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 27,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 5
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 28,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 3
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 30,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 3
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 30,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 3
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 30,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 3
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 30,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 3
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 30,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 2
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 30,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 2
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 31,
+            "total": 40,
+            "running": 4,
+            "cancelled": 0,
+            "waiting": 2
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 31,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 1
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 31,
+            "total": 40,
+            "running": 6,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 32,
+            "total": 40,
+            "running": 5,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 34,
+            "total": 40,
+            "running": 3,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 34,
+            "total": 40,
+            "running": 3,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 34,
+            "total": 40,
+            "running": 3,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 34,
+            "total": 40,
+            "running": 3,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 34,
+            "total": 40,
+            "running": 3,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 35,
+            "total": 40,
+            "running": 2,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 35,
+            "total": 40,
+            "running": 2,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 35,
+            "total": 40,
+            "running": 2,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 36,
+            "total": 40,
+            "running": 1,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        },
+        {
+          "created": 40,
+          "paused": false,
+          "counts": {
+            "failed": 3,
+            "success": 37,
+            "total": 40,
+            "running": 0,
+            "cancelled": 0,
+            "waiting": 0
+          }
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "scenario": "report-kpi-image-condition-subcase-match",
+      "passed": true,
+      "torsionReport": {
+        "jobNo": "CAE-20261012-000158",
+        "parserVersion": "v1",
+        "reportVersion": 1,
+        "reportId": 75,
+        "conditionCode": "BIW_TORSION",
+        "subcase": 1,
+        "slides": 5,
+        "canonicalMetrics": 7,
+        "pptxSha256": "5b8aeee792187ad775e0dd751f4270cf6f55937a50ce605cde19891288ac5c7f",
+        "imageSha256": [
+          "04c05aabc86df89d9ef20a6b14db72e9f4e867450d3ae52e6fdcc0fece1e90e8",
+          "3916461395c834c2c66b9db694dc81b1cb21305af8ce7cce8a6ae01d4721b97e",
+          "3bdd37a657017d418d099ee58b6bc2c1c01ad4a95e23cf5eb42e309a9eb1acde",
+          "7cebf45d84e9cff149535958d73ea81473e7b6dff8592c3dfd5d8057a60515fe"
+        ],
+        "localArtifacts": ".local/acceptance/CAE-20261012-000158/v1/report-v1"
+      },
+      "modalReport": {
+        "jobNo": "CAE-20261012-000206",
+        "parserVersion": "v1",
+        "reportVersion": 1,
+        "reportId": 117,
+        "conditionCode": "BIW_MODAL",
+        "subcase": 2,
+        "slides": 5,
+        "canonicalMetrics": 7,
+        "pptxSha256": "d88af1aa0720346307da3dc05f8ce5c0eb5b552359e6cdda462f3681e0bfd0e3",
+        "imageSha256": [
+          "6d5b6ab6c8f864af48edba9051f53a91e6c2b3130cdc719bbc6f33ea46389421",
+          "84f6bccf167eecd240ef3cc9250c838c16e7e90e373536ab65a5e890aa46ea46",
+          "e68317792f751fe13e3764e3b057b6aa2a5ea0c13c35e0f9e4ed1ee16e0f47d8",
+          "ed5d07eca91f92ef9e30ac3675d2a0d02dde5b1340179dec51143b6f70c078fa"
+        ],
+        "localArtifacts": ".local/acceptance/CAE-20261012-000206/v1/report-v1"
+      }
+    },
+    {
+      "number": 12,
+      "scenario": "backend-restart-solver-continues",
+      "passed": true,
+      "jobNo": "CAE-20261012-000207",
+      "executionId": 125,
+      "pid": 8709,
+      "workerContainersUnchanged": true
+    }
+  ],
+  "dlqEvidencePreserved": true,
+  "finalNodeLedger": [
+    {
+      "nodeId": "node-a",
+      "hostname": "78e0cec83199",
+      "agentUrl": "http://worker-node-a:8000",
+      "status": "ONLINE",
+      "drained": false,
+      "workspaceReachable": true,
+      "cpuTotal": 16,
+      "cpuUsed": 0,
+      "cpuReserved": 0,
+      "observedCpuUsed": 0,
+      "memoryTotalGb": 32,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0,
+      "observedMemoryUsedGb": 0,
+      "solverTags": [
+        "STRUCTURE",
+        "NVH"
+      ],
+      "runningJobs": [],
+      "lastHeartbeat": "2026-10-12T08:37:27.085280Z",
+      "updatedAt": "2026-10-12T08:37:27.088493Z",
+      "online": true
+    },
+    {
+      "nodeId": "node-b",
+      "hostname": "74937a0c55d7",
+      "agentUrl": "http://worker-node-b:8000",
+      "status": "ONLINE",
+      "drained": false,
+      "workspaceReachable": true,
+      "cpuTotal": 32,
+      "cpuUsed": 0,
+      "cpuReserved": 0,
+      "observedCpuUsed": 0,
+      "memoryTotalGb": 64,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0,
+      "observedMemoryUsedGb": 0,
+      "solverTags": [
+        "STRUCTURE",
+        "CRASH"
+      ],
+      "runningJobs": [],
+      "lastHeartbeat": "2026-10-12T08:37:23.931374Z",
+      "updatedAt": "2026-10-12T08:37:23.932589Z",
+      "online": true
+    },
+    {
+      "nodeId": "node-c",
+      "hostname": "bc7237a33103",
+      "agentUrl": "http://worker-node-c:8000",
+      "status": "ONLINE",
+      "drained": false,
+      "workspaceReachable": true,
+      "cpuTotal": 24,
+      "cpuUsed": 0,
+      "cpuReserved": 0,
+      "observedCpuUsed": 0,
+      "memoryTotalGb": 48,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0,
+      "observedMemoryUsedGb": 0,
+      "solverTags": [
+        "CFD",
+        "STRUCTURE"
+      ],
+      "runningJobs": [],
+      "lastHeartbeat": "2026-10-12T08:37:24.637779Z",
+      "updatedAt": "2026-10-12T08:37:24.638936Z",
+      "online": true
+    }
+  ],
+  "finalLicenseLedger": [
+    {
+      "feature": "CFD",
+      "totalTokens": 2,
+      "reservedTokens": 0,
+      "inUseTokens": 0
+    },
+    {
+      "feature": "CRASH",
+      "totalTokens": 2,
+      "reservedTokens": 0,
+      "inUseTokens": 0
+    },
+    {
+      "feature": "NVH",
+      "totalTokens": 2,
+      "reservedTokens": 0,
+      "inUseTokens": 0
+    },
+    {
+      "feature": "OPTISTRUCT",
+      "totalTokens": 4,
+      "reservedTokens": 0,
+      "inUseTokens": 0
+    }
+  ]
+}

@@ -255,6 +255,22 @@ class ExecutionMonitoringIntegrationTest {
   }
 
   @Test
+  void missingReceiptBeforeSubmitDeliveryDoesNotDisableTheOriginalCommand() throws Exception {
+    Fixture fixture = allocated();
+    AGENT.missing = true;
+    monitor.reconcileExecution(fixture.executionId());
+    monitor.reconcileExecution(fixture.executionId());
+    assertThat(jobs.findById(fixture.jobId())).containsEntry("status", "SUBMITTING");
+    assertThat(executions.find(fixture.executionId())).containsEntry("status", "SUBMITTING");
+    assertThat(reservationStatus(fixture)).isEqualTo("RESERVED");
+    assertThat(AGENT.submitAttempts.get()).isZero();
+    AGENT.missing = false;
+    assertThat(dispatch.submit(fixture.executionId())).isEqualTo(DispatchOutcome.ACCEPTED);
+    assertThat(executions.history(fixture.jobId())).hasSize(1);
+    assertThat(AGENT.submitAttempts.get()).isEqualTo(1);
+  }
+
+  @Test
   void remote404IsUncertaintyAndNeverReleasesCapacityOrResubmits() throws Exception {
     Fixture fixture = submitted();
     AGENT.missing = true;

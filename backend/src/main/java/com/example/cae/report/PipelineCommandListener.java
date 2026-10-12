@@ -69,6 +69,7 @@ public class PipelineCommandListener {
           .equals(kind.equals("POST") ? "POST_PROCESS_REQUESTED" : "REPORT_REQUESTED"))
         throw new IllegalArgumentException("Wrong stage event");
     } catch (RuntimeException malformed) {
+      metrics.counter("cae.mq.consume.failure").increment();
       channel.basicReject(tag, false);
       return;
     }
@@ -101,6 +102,7 @@ public class PipelineCommandListener {
             inbox.complete(command, consumer, claim.owner());
             ack(channel, tag, kind);
           } else {
+            metrics.counter("cae.mq.consume.failure").increment();
             var disposition =
                 inbox.fail(
                     command,

@@ -24,18 +24,24 @@ public class ExecutionDispatchService {
   private final ComputeAgentClient agents;
   private final ResourceReservationService resources;
   private final TransactionTemplate tx;
+  private final io.micrometer.core.instrument.Timer latency;
 
   public ExecutionDispatchService(
       ExecutionRepository executions,
       JobRepository jobs,
       ComputeAgentClient agents,
       ResourceReservationService resources,
-      TransactionTemplate tx) {
+      TransactionTemplate tx,
+      io.micrometer.core.instrument.MeterRegistry metrics) {
     this.executions = executions;
     this.jobs = jobs;
     this.agents = agents;
     this.resources = resources;
     this.tx = tx;
+    this.latency =
+        io.micrometer.core.instrument.Timer.builder("cae.job.submit.latency")
+            .publishPercentileHistogram()
+            .register(metrics);
   }
 
   /**
@@ -51,6 +57,7 @@ public class ExecutionDispatchService {
         executionId,
         execution.get("submitRequestId"),
         execution.get("nodeId"));
+    long submitStarted = System.nanoTime();
     try {
       Map<String, Object> accepted = agents.submit(execution.get("nodeId").toString(), request);
       DispatchOutcome outcome =
@@ -164,6 +171,8 @@ public class ExecutionDispatchService {
                       failure.code().name()));
             return DispatchOutcome.PERMANENT_FAILURE;
           });
+    } finally {
+      latency.record(System.nanoTime() - submitStarted, java.util.concurrent.TimeUnit.NANOSECONDS);
     }
   }
 

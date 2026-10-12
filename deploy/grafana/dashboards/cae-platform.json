@@ -2,12 +2,12 @@
   "uid": "cae-platform",
   "title": "CAE Platform — Public Mock Demo",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "tags": [
     "cae",
     "public-demo"
   ],
-  "timezone": "browser",
+  "timezone": "Asia/Shanghai",
   "refresh": "10s",
   "time": {
     "from": "now-30m",
@@ -61,28 +61,32 @@
     },
     {
       "id": 2,
-      "title": "Running jobs",
-      "type": "stat",
+      "title": "Running / waiting jobs",
+      "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "cae-prometheus"
       },
       "gridPos": {
-        "x": 6,
-        "y": 0,
-        "w": 6,
-        "h": 7
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
-          "refId": "A",
           "expr": "cae_jobs_running",
-          "legendFormat": "{{status}} {{analysis_type}}"
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        },
+        {
+          "expr": "cae_jobs_waiting_resource",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "color": {
             "mode": "palette-classic"
           }
@@ -90,41 +94,36 @@
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
       }
     },
     {
       "id": 3,
-      "title": "Waiting for resources",
-      "type": "stat",
+      "title": "Job status by discipline",
+      "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "cae-prometheus"
       },
       "gridPos": {
         "x": 12,
-        "y": 0,
-        "w": 6,
-        "h": 7
+        "y": 6,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
+          "expr": "sum by (status,analysis_type) (cae_jobs_total)",
           "refId": "A",
-          "expr": "cae_jobs_waiting_resource",
-          "legendFormat": "{{status}} {{analysis_type}}"
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "color": {
             "mode": "palette-classic"
           }
@@ -132,209 +131,325 @@
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
       }
     },
     {
       "id": 4,
-      "title": "Pending outbox events",
+      "title": "Submit latency p95",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95,sum by (le) (rate(cae_job_submit_latency_seconds_bucket[5m])))",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Average queue seconds / samples",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "cae_job_queue_seconds",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        },
+        {
+          "expr": "cae_job_queue_samples",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Outbox pending / oldest age",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "cae_outbox_pending",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        },
+        {
+          "expr": "cae_outbox_oldest_pending_seconds",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "MQ failures / offline nodes",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 22,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(cae_mq_consume_failure_total[5m])",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        },
+        {
+          "expr": "cae_agent_offline_total",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Node CPU used / reserved",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "cae_node_cpu_used",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        },
+        {
+          "expr": "cae_node_cpu_reserved",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Node memory used / reserved GiB",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "cae_node_memory_used_gb",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        },
+        {
+          "expr": "cae_node_memory_reserved_gb",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "License token ledger",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "cae_license_tokens",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Reports / reservations",
       "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "cae-prometheus"
       },
       "gridPos": {
-        "x": 18,
-        "y": 0,
-        "w": 6,
-        "h": 7
+        "x": 12,
+        "y": 38,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
-          "refId": "A",
-          "expr": "cae_outbox_pending",
-          "legendFormat": "{{status}} {{analysis_type}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
-      }
-    },
-    {
-      "id": 5,
-      "title": "Jobs by state and discipline",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "cae-prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 7,
-        "w": 6,
-        "h": 7
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "cae_jobs_total",
-          "legendFormat": "{{status}} {{analysis_type}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
-      }
-    },
-    {
-      "id": 6,
-      "title": "Reports generated",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "cae-prometheus"
-      },
-      "gridPos": {
-        "x": 6,
-        "y": 7,
-        "w": 6,
-        "h": 7
-      },
-      "targets": [
-        {
-          "refId": "A",
           "expr": "cae_reports_generated_total",
-          "legendFormat": "{{status}} {{analysis_type}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
-      }
-    },
-    {
-      "id": 7,
-      "title": "MQ consumer failures",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "cae-prometheus"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 7,
-        "w": 6,
-        "h": 7
-      },
-      "targets": [
-        {
           "refId": "A",
-          "expr": "cae_mq_consume_failure_total",
-          "legendFormat": "{{status}} {{analysis_type}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          }
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
         },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
-      }
-    },
-    {
-      "id": 8,
-      "title": "Offline agents",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "cae-prometheus"
-      },
-      "gridPos": {
-        "x": 18,
-        "y": 7,
-        "w": 6,
-        "h": 7
-      },
-      "targets": [
         {
-          "refId": "A",
-          "expr": "cae_agent_offline_total",
-          "legendFormat": "{{status}} {{analysis_type}}"
+          "expr": "cae_resource_reservation_total",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "color": {
             "mode": "palette-classic"
           }
@@ -342,167 +457,41 @@
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
-      }
-    },
-    {
-      "id": 9,
-      "title": "JVM heap used",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "cae-prometheus"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 14,
-        "w": 6,
-        "h": 7
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum(jvm_memory_used_bytes{area=\"heap\"})",
-          "legendFormat": "{{status}} {{analysis_type}}"
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
-      }
-    },
-    {
-      "id": 10,
-      "title": "HTTP requests per second",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "cae-prometheus"
-      },
-      "gridPos": {
-        "x": 6,
-        "y": 14,
-        "w": 6,
-        "h": 7
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum(rate(http_server_requests_seconds_count[1m]))",
-          "legendFormat": "{{status}} {{analysis_type}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps",
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
-      }
-    },
-    {
-      "id": 11,
-      "title": "Submission mean latency",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "cae-prometheus"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 14,
-        "w": 6,
-        "h": 7
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "rate(cae_job_submit_latency_seconds_sum[1m]) / clamp_min(rate(cae_job_submit_latency_seconds_count[1m]), 0.001)",
-          "legendFormat": "{{status}} {{analysis_type}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "value"
       }
     },
     {
       "id": 12,
-      "title": "Resource reservations",
+      "title": "SSE / active batches",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "cae-prometheus"
       },
       "gridPos": {
-        "x": 18,
-        "y": 14,
-        "w": 6,
-        "h": 7
+        "x": 0,
+        "y": 46,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
+          "expr": "cae_sse_connections",
           "refId": "A",
-          "expr": "cae_resource_reservation_total",
-          "legendFormat": "{{status}} {{analysis_type}}"
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        },
+        {
+          "expr": "cae_batches_active",
+          "refId": "B",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "color": {
             "mode": "palette-classic"
           }
@@ -510,15 +499,48 @@
         "overrides": []
       },
       "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 13,
+      "title": "Metrics snapshot age",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "cae-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 46,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "time()-cae_metrics_last_success_timestamp_seconds",
+          "refId": "A",
+          "legendFormat": "{{node}} {{status}} {{analysis_type}} {{feature}} {{state}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
         },
-        "textMode": "auto",
-        "colorMode": "value"
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
       }
     }
   ]

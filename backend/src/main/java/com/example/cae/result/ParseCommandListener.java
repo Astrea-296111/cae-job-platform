@@ -29,6 +29,7 @@ public class ParseCommandListener {
   public static final String CONSUMER = "result-parse-v1";
   public static final String QUEUE = "cae.job.parse";
   private static final Logger LOG = LoggerFactory.getLogger(ParseCommandListener.class);
+  private final io.micrometer.core.instrument.Counter consumeFailures;
   private final JsonCodec json;
   private final InboxRepository inbox;
   private final ResultParsingService parsing;
@@ -63,6 +64,7 @@ public class ParseCommandListener {
     this.executions = executions;
     this.maxAttempts = maxAttempts;
     retryBase = Duration.ofMillis(retryBaseMs);
+    consumeFailures = metrics.counter("cae.mq.consume.failure");
     acked = metrics.counter("cae.mq.parse.acked");
     retries = metrics.counter("cae.mq.parse.retry");
     dead = metrics.counter("cae.mq.parse.dead");
@@ -85,6 +87,7 @@ public class ParseCommandListener {
       recover(channel, tag);
       return;
     } catch (RuntimeException malformed) {
+      consumeFailures.increment();
       dead.increment();
       channel.basicReject(tag, false);
       return;
@@ -94,6 +97,7 @@ public class ParseCommandListener {
       switch (claim.disposition()) {
         case DONE -> acknowledge(channel, tag);
         case DEAD -> {
+          consumeFailures.increment();
           dead.increment();
           channel.basicReject(tag, false);
         }
@@ -110,6 +114,7 @@ public class ParseCommandListener {
           unavailable.getClass().getSimpleName());
       recover(channel, tag);
     } catch (IllegalArgumentException invalidIdentity) {
+      consumeFailures.increment();
       dead.increment();
       channel.basicReject(tag, false);
     }
@@ -140,9 +145,11 @@ public class ParseCommandListener {
     var disposition =
         inbox.fail(command, CONSUMER, owner, reason, maxAttempts, retryBase, () -> {});
     if (disposition == InboxRepository.FailureDisposition.RETRY) {
+      consumeFailures.increment();
       retries.increment();
       acknowledge(channel, tag);
     } else {
+      consumeFailures.increment();
       dead.increment();
       channel.basicReject(tag, false);
     }

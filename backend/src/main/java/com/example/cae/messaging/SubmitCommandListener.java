@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 public class SubmitCommandListener {
   public static final String CONSUMER = "job-submit-v1";
   private static final Logger LOG = LoggerFactory.getLogger(SubmitCommandListener.class);
+  private final io.micrometer.core.instrument.Counter consumeFailures;
   private final JsonCodec json;
   private final InboxRepository inbox;
   private final JobAllocationService allocation;
@@ -65,6 +66,7 @@ public class SubmitCommandListener {
     this.retryBase = Duration.ofMillis(retryBaseMs);
     if (maxAttempts < 1 || maxAttempts > 100 || retryBaseMs < 1)
       throw new IllegalArgumentException("Submit retry configuration is invalid");
+    consumeFailures = metrics.counter("cae.mq.consume.failure");
     acked = metrics.counter("cae.mq.commands.acked");
     retries = metrics.counter("cae.mq.commands.retry");
     dead = metrics.counter("cae.mq.commands.dead");
@@ -88,6 +90,7 @@ public class SubmitCommandListener {
       return;
     } catch (RuntimeException invalid) {
       LOG.warn("Rejected invalid submit envelope reason={}", invalid.getClass().getSimpleName());
+      consumeFailures.increment();
       dead.increment();
       channel.basicReject(tag, false);
       return;
@@ -97,6 +100,7 @@ public class SubmitCommandListener {
       switch (claim.disposition()) {
         case DONE -> acknowledge(channel, tag);
         case DEAD -> {
+          consumeFailures.increment();
           dead.increment();
           channel.basicReject(tag, false);
         }
@@ -113,6 +117,7 @@ public class SubmitCommandListener {
           failure.getClass().getSimpleName());
       recoverPersistence(channel, tag);
     } catch (IllegalArgumentException invalidIdentity) {
+      consumeFailures.increment();
       dead.increment();
       channel.basicReject(tag, false);
     }
@@ -152,9 +157,11 @@ public class SubmitCommandListener {
                     executionId(envelope), envelope.eventId(), maxAttempts, reason);
             });
     if (disposition == FailureDisposition.RETRY) {
+      consumeFailures.increment();
       retries.increment();
       acknowledge(channel, tag);
     } else {
+      consumeFailures.increment();
       dead.increment();
       channel.basicReject(tag, false);
     }

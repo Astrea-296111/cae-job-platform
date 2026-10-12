@@ -1,0 +1,62 @@
+{
+  "scenario": "public baseline/current/modal full demo",
+  "reports": [
+    {
+      "jobNo": "CAE-20261012-000612",
+      "parserVersion": "v1",
+      "reportVersion": 1,
+      "reportId": 223,
+      "conditionCode": "BIW_TORSION",
+      "subcase": 1,
+      "slides": 5,
+      "canonicalMetrics": 7,
+      "pptxSha256": "b0d58e7abf9fdbb5273bda05c882f0dc0e2779cddf84b50245ff58b08eb486f6",
+      "imageSha256": [
+        "28ad54d17180260e0ecd290c8c8a33188fa6e24d0300dcf0b25daa17a0422253",
+        "42f328675ac0e5883769c8b765efddd519318c2b3c79e43aa0e7d18f04885dc9",
+        "678fea224496ca8d2ac38c07b7324351a3501fdb7af06edf66162f70fbf5fb12",
+        "795ff54198a76e5f2635e006e4a1b02864350f580203d0620ab229665faf1857"
+      ],
+      "localArtifacts": ".local/acceptance/CAE-20261012-000612/v1/report-v1",
+      "downloadUrl": "/api/v1/artifacts/2452/download"
+    },
+    {
+      "jobNo": "CAE-20261012-000613",
+      "parserVersion": "v1",
+      "reportVersion": 1,
+      "reportId": 224,
+      "conditionCode": "BIW_TORSION",
+      "subcase": 1,
+      "slides": 5,
+      "canonicalMetrics": 7,
+      "pptxSha256": "670fd01717d271bd623e3d885755a273899e318921e1e8b5e2fedb88ead28f3f",
+      "imageSha256": [
+        "04c05aabc86df89d9ef20a6b14db72e9f4e867450d3ae52e6fdcc0fece1e90e8",
+        "3916461395c834c2c66b9db694dc81b1cb21305af8ce7cce8a6ae01d4721b97e",
+        "3bdd37a657017d418d099ee58b6bc2c1c01ad4a95e23cf5eb42e309a9eb1acde",
+        "6883620a150db29525936971d2e2d9824a142a071874065d9eb55967b4ab9186"
+      ],
+      "localArtifacts": ".local/acceptance/CAE-20261012-000613/v1/report-v1",
+      "downloadUrl": "/api/v1/artifacts/2463/download"
+    },
+    {
+      "jobNo": "CAE-20261012-000614",
+      "parserVersion": "v1",
+      "reportVersion": 1,
+      "reportId": 225,
+      "conditionCode": "BIW_MODAL",
+      "subcase": 2,
+      "slides": 5,
+      "canonicalMetrics": 7,
+      "pptxSha256": "b3087cb9c564e635f216d7895e3637527e595cfb250e4384cb4bb684db3f0201",
+      "imageSha256": [
+        "6d5b6ab6c8f864af48edba9051f53a91e6c2b3130cdc719bbc6f33ea46389421",
+        "84f6bccf167eecd240ef3cc9250c838c16e7e90e373536ab65a5e890aa46ea46",
+        "e68317792f751fe13e3764e3b057b6aa2a5ea0c13c35e0f9e4ed1ee16e0f47d8",
+        "ed5d07eca91f92ef9e30ac3675d2a0d02dde5b1340179dec51143b6f70c078fa"
+      ],
+      "localArtifacts": ".local/acceptance/CAE-20261012-000614/v1/report-v1",
+      "downloadUrl": "/api/v1/artifacts/2474/download"
+    }
+  ]
+}

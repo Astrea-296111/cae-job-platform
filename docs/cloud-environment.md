@@ -1,0 +1,9 @@
+# Cloud environment setup
+
+Setup follows the `cloud-environment-onboarding:setup` skill. The reusable configuration draft selects this repository's `main` branch, uses the existing `/workspace/cae-job-platform` checkout, and installs through `bash scripts/bootstrap.sh`. Startup refreshes cloud proxy/public CA build configuration, uses writable `.local/docker` for Docker CLI configuration, starts the eleven services with health checks, and verifies public authenticated business APIs.
+
+Pinned toolchain, Maven cache, Python virtual environment and frontend lockfile installation have been executed successfully. BuildKit consumes ephemeral proxy/CA/truststore files without embedding credentials in application layers; TLS verification remains enabled. The installation command and saved startup instructions were re-executed on the final source. Complete image builds and fresh owned-schema migration/seed tests pass.
+
+The cloud snapshot may retain files and caches but must not assume containers, open connections, authentication or Solver processes survive restoration. If application images are absent, start MySQL/Redis/RabbitMQ, run `scripts/check.sh --all-images`, then start the complete deployment. Existing data and queues are retained; backend tests clean only their own UUID schema, Redis prefix and Rabbit virtual host. Under Docker vfs, build guards reclaim only unused cache/dangling images and an unused bootstrap extraction image, never application volumes.
+
+The configuration is saved as a draft for review. Configuration publication and launching a separate restored cloud task have not been performed. This does not change the current deployment's complete build/start/seed/demo/test acceptance. All reusable installation and startup commands are also available in the repository README and scripts.

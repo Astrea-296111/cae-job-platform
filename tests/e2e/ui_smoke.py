@@ -209,6 +209,18 @@ def main():
         evidence["jobs"].append(verify_detail(page, modal_job, modal))
         page.get_by_role("link", name="计算资源").click()
         expect(page.locator(".nodes-grid > .el-card")).to_have_count(3)
+        license_card = page.locator(".el-card").filter(
+            has=page.get_by_role("heading", name="License Token", exact=True)
+        )
+        expect(license_card.locator(".el-table__row")).to_have_count(4)
+        for pool in api("/license-pools"):
+            license_row = license_card.locator(".el-table__row").filter(
+                has_text=pool["feature"]
+            )
+            expect(license_row.locator("td").nth(3)).to_have_text(
+                str(pool["inUseTokens"])
+            )
+        evidence["checks"]["licenseUsageMatchesRealApi"] = True
         assert page.get_by_role("button", name="暂停新分配", exact=True).count() == 0
         evidence["checks"]["engineerHidesAdminControls"] = True
         login(page, "lead")

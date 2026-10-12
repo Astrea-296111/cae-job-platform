@@ -6,7 +6,7 @@ import type {Node, Profile} from '../api/types'
 import { useSessionStore } from '../stores/session'
 const edit=ref<Profile>();const editDialog=ref(false);function openEdit(profile:Profile){edit.value={...profile,allowedAnalysisTypes:[...profile.allowedAnalysisTypes]};editDialog.value=true}
 async function saveProfile(){if(!edit.value)return;try{await api.put('/resource-profiles/'+edit.value.name,edit.value);editDialog.value=false;await load();ElMessage.success('资源档位已更新，新任务使用新版本。')}catch(failure){ElMessage.error(errorText(failure))}}
-const session=useSessionStore();const nodes=ref<Node[]>([]);const profiles=ref<Profile[]>([]);const licenses=ref<{feature:string;totalTokens:number;reservedTokens:number;usedTokens:number}[]>([]);const error=ref('');const busy=ref(false)
+const session=useSessionStore();const nodes=ref<Node[]>([]);const profiles=ref<Profile[]>([]);const licenses=ref<{feature:string;totalTokens:number;reservedTokens:number;inUseTokens:number}[]>([]);const error=ref('');const busy=ref(false)
 async function load(){busy.value=true;try{const responses=await Promise.all([api.get<Node[]>('/compute-nodes'),api.get<Profile[]>('/resource-profiles'),api.get('/license-pools')]);nodes.value=responses[0].data;profiles.value=responses[1].data;licenses.value=responses[2].data;error.value=''}catch(failure){error.value=errorText(failure)}finally{busy.value=false}}
 async function drain(node:Node){try{await api.patch(`/compute-nodes/${node.nodeId}/drain`,{drained:!node.drained});await load();ElMessage.success(node.drained?'已恢复调度。':'已停止向该节点分配新任务。')}catch(failure){ElMessage.error(errorText(failure))}}
 let timer:ReturnType<typeof setInterval>;onMounted(()=>{void load();timer=setInterval(()=>{if(!document.hidden)void load()},10000)});onUnmounted(()=>clearInterval(timer))
@@ -49,7 +49,7 @@ let timer:ReturnType<typeof setInterval>;onMounted(()=>{void load();timer=setInt
       </el-card>
     </div><el-card shadow="never" class="space-top">
       <h2>License Token</h2><el-table :data="licenses">
-        <el-table-column prop="feature" label="Feature" /><el-table-column prop="totalTokens" label="总量" /><el-table-column prop="reservedTokens" label="预留" /><el-table-column prop="usedTokens" label="使用" />
+        <el-table-column prop="feature" label="Feature" /><el-table-column prop="totalTokens" label="总量" /><el-table-column prop="reservedTokens" label="预留" /><el-table-column prop="inUseTokens" label="使用" />
       </el-table><p class="muted small">
         公开版使用模拟 Token 账本，不需要商业许可证。
       </p>

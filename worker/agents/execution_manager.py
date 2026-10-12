@@ -6,7 +6,6 @@ import os
 import signal
 import socket
 import subprocess
-import sys
 import threading
 import uuid
 from datetime import UTC, datetime
@@ -15,6 +14,7 @@ from pathlib import Path
 import psutil
 
 from adapters.profiles import validate_profile
+from adapters.solver import public_solver
 from agents.files import atomic_json, ensure_contained, verify_snapshot
 from agents.process_registry import TERMINAL, ProcessRegistry, utc_now
 from app.contracts import SubmitRequest
@@ -73,13 +73,9 @@ class ExecutionManager:
                     atomic_json(output / "cancel.request", {"requestedAt": utc_now()})
                 with (output / "solver.log").open("ab") as log:
                     child = subprocess.Popen(
-                        [
-                            sys.executable,
-                            "-m",
-                            "mock_solver",
-                            "--config",
-                            str(output / "execution-config.json"),
-                        ],
+                        public_solver(request.analysis_type).command(
+                            output / "execution-config.json"
+                        ),
                         cwd=Path(__file__).resolve().parents[1],
                         stdin=subprocess.DEVNULL,
                         stdout=log,

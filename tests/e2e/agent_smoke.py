@@ -39,7 +39,9 @@ class Api:
     def require(self, method, path, payload=None, timeout=5):
         status, body = self.call(method, path, payload, timeout)
         if not 200 <= status < 300:
-            raise AssertionError(f"{method} {path}: HTTP {status}, code={body.get('code')}")
+            raise AssertionError(
+                f"{method} {path}: HTTP {status}, code={body.get('code')}"
+            )
         return body
 
 
@@ -54,9 +56,18 @@ def wait_for(probe, predicate, description, timeout=20):
 
 
 def assert_identity(expected, actual):
-    for field in ("externalExecutionId", "executionRequestId", "pid", "processIdentity"):
-        assert expected.get(field) == actual.get(field), f"Execution identity changed: {field}"
-    assert isinstance(actual.get("pid"), int) and actual["pid"] > 0, "No real solver PID"
+    for field in (
+        "externalExecutionId",
+        "executionRequestId",
+        "pid",
+        "processIdentity",
+    ):
+        assert expected.get(field) == actual.get(field), (
+            f"Execution identity changed: {field}"
+        )
+    assert isinstance(actual.get("pid"), int) and actual["pid"] > 0, (
+        "No real solver PID"
+    )
     assert isinstance(actual.get("processIdentity"), str), "No process start identity"
 
 
@@ -97,7 +108,8 @@ def new_execution(backend, runtime, response_delay=0):
 def terminal(agent, external_id):
     state = wait_for(
         lambda: agent.require("GET", f"/worker/v1/jobs/{external_id}"),
-        lambda body: body.get("state") in {"SUCCESS", "RUNTIME_FAILED", "TIMEOUT", "CANCELLED"},
+        lambda body: body.get("state")
+        in {"SUCCESS", "RUNTIME_FAILED", "TIMEOUT", "CANCELLED"},
         "terminal solver state",
     )
     return state
@@ -122,10 +134,13 @@ def main():
     encoded = base64.b64encode(f"{user}:{password}".encode()).decode()
     backend = Api(options.backend_url, {"Authorization": "Basic " + encoded})
     agent = Api(
-        options.node_url, {"X-Service-Token": os.getenv("SERVICE_TOKEN", "demo-service-token")}
+        options.node_url,
+        {"X-Service-Token": os.getenv("SERVICE_TOKEN", "demo-service-token")},
     )
 
-    status, unauthorized = agent.call("GET", "/worker/v1/node/status", authenticated=False)
+    status, unauthorized = agent.call(
+        "GET", "/worker/v1/node/status", authenticated=False
+    )
     assert status == 401 and unauthorized.get("code") == "UNAUTHENTICATED", (
         "Agent token is not enforced"
     )
@@ -177,14 +192,20 @@ def main():
         lambda response: response[0] == 200,
         "accepted execution after HTTP timeout",
     )[1]
-    assert isinstance(recovered.get("pid"), int), "Timeout happened before process acceptance"
-    retried = agent.require("POST", "/worker/v1/jobs/submit", timeout_request, timeout=1)
+    assert isinstance(recovered.get("pid"), int), (
+        "Timeout happened before process acceptance"
+    )
+    retried = agent.require(
+        "POST", "/worker/v1/jobs/submit", timeout_request, timeout=1
+    )
     assert retried["externalExecutionId"] == recovered["externalExecutionId"], (
         "Response timeout retry started another execution"
     )
     assert_identity(recovered, agent.require("GET", request_path))
     completed = terminal(agent, recovered["externalExecutionId"])
-    assert completed["state"] == "SUCCESS", "Timed-out HTTP response must not stop the solver"
+    assert completed["state"] == "SUCCESS", (
+        "Timed-out HTTP response must not stop the solver"
+    )
     assert_identity(recovered, completed)
     summaries.append(
         {
@@ -209,7 +230,9 @@ def main():
     assert cancelled["state"] == "CANCELLED", "Remote cancellation was not confirmed"
     assert_identity(running, cancelled)
     repeated_cancel = agent.require("POST", f"/worker/v1/jobs/{external_id}/cancel", {})
-    assert repeated_cancel["state"] == "CANCELLED", "Repeated cancel changed terminal state"
+    assert repeated_cancel["state"] == "CANCELLED", (
+        "Repeated cancel changed terminal state"
+    )
     summaries.append(
         {
             "scenario": "running-cancel",

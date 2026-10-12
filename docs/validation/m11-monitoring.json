@@ -1,0 +1,132 @@
+{
+  "atUtc": "2026-10-12T09:21:52.690268+00:00",
+  "requiredMetricFamilies": [
+    "cae_jobs_total",
+    "cae_jobs_running",
+    "cae_jobs_waiting_resource",
+    "cae_job_submit_latency_seconds",
+    "cae_job_queue_seconds",
+    "cae_outbox_pending",
+    "cae_mq_consume_failure_total",
+    "cae_agent_offline_total",
+    "cae_resource_reservation_total",
+    "cae_reports_generated_total"
+  ],
+  "fixedJobSeries": 76,
+  "backendTarget": {
+    "discoveredLabels": {
+      "__address__": "backend:8080",
+      "__metrics_path__": "/actuator/prometheus",
+      "__scheme__": "http",
+      "__scrape_interval__": "10s",
+      "__scrape_timeout__": "10s",
+      "environment": "public-demo",
+      "job": "cae-backend"
+    },
+    "labels": {
+      "environment": "public-demo",
+      "instance": "backend:8080",
+      "job": "cae-backend"
+    },
+    "scrapePool": "cae-backend",
+    "scrapeUrl": "http://backend:8080/actuator/prometheus",
+    "globalUrl": "http://backend:8080/actuator/prometheus",
+    "lastError": "",
+    "lastScrape": "2026-10-12T09:21:44.231944729Z",
+    "lastScrapeDuration": 0.012321151,
+    "health": "up",
+    "scrapeInterval": "10s",
+    "scrapeTimeout": "10s"
+  },
+  "dashboardQueries": [
+    {
+      "expression": "up{job=\"cae-backend\"}",
+      "series": 1
+    },
+    {
+      "expression": "cae_jobs_running",
+      "series": 1
+    },
+    {
+      "expression": "cae_jobs_waiting_resource",
+      "series": 1
+    },
+    {
+      "expression": "sum by (status,analysis_type) (cae_jobs_total)",
+      "series": 76
+    },
+    {
+      "expression": "histogram_quantile(0.95,sum by (le) (rate(cae_job_submit_latency_seconds_bucket[5m])))",
+      "series": 1
+    },
+    {
+      "expression": "cae_job_queue_seconds",
+      "series": 1
+    },
+    {
+      "expression": "cae_job_queue_samples",
+      "series": 1
+    },
+    {
+      "expression": "cae_outbox_pending",
+      "series": 1
+    },
+    {
+      "expression": "cae_outbox_oldest_pending_seconds",
+      "series": 1
+    },
+    {
+      "expression": "rate(cae_mq_consume_failure_total[5m])",
+      "series": 1
+    },
+    {
+      "expression": "cae_agent_offline_total",
+      "series": 1
+    },
+    {
+      "expression": "cae_node_cpu_used",
+      "series": 3
+    },
+    {
+      "expression": "cae_node_cpu_reserved",
+      "series": 3
+    },
+    {
+      "expression": "cae_node_memory_used_gb",
+      "series": 3
+    },
+    {
+      "expression": "cae_node_memory_reserved_gb",
+      "series": 3
+    },
+    {
+      "expression": "cae_license_tokens",
+      "series": 12
+    },
+    {
+      "expression": "cae_reports_generated_total",
+      "series": 1
+    },
+    {
+      "expression": "cae_resource_reservation_total",
+      "series": 1
+    },
+    {
+      "expression": "cae_sse_connections",
+      "series": 1
+    },
+    {
+      "expression": "cae_batches_active",
+      "series": 1
+    },
+    {
+      "expression": "time()-cae_metrics_last_success_timestamp_seconds",
+      "series": 1
+    }
+  ],
+  "grafana": {
+    "uid": "cae-platform",
+    "timezone": "Asia/Shanghai",
+    "panels": 13
+  }
+}

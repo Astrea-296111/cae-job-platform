@@ -1,0 +1,53 @@
+{
+  "nodes": [
+    {
+      "nodeId": "node-a",
+      "status": "ONLINE",
+      "cpuUsed": 0,
+      "drained": 0,
+      "cpuReserved": 0,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0
+    },
+    {
+      "nodeId": "node-b",
+      "status": "ONLINE",
+      "cpuUsed": 0,
+      "drained": 0,
+      "cpuReserved": 0,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0
+    },
+    {
+      "nodeId": "node-c",
+      "status": "ONLINE",
+      "cpuUsed": 0,
+      "drained": 0,
+      "cpuReserved": 0,
+      "memoryUsedGb": 0,
+      "memoryReservedGb": 0
+    }
+  ],
+  "license": [
+    {
+      "inUse": 0,
+      "feature": "CFD",
+      "reserved": 0
+    },
+    {
+      "inUse": 0,
+      "feature": "CRASH",
+      "reserved": 0
+    },
+    {
+      "inUse": 0,
+      "feature": "NVH",
+      "reserved": 0
+    },
+    {
+      "inUse": 0,
+      "feature": "OPTISTRUCT",
+      "reserved": 0
+    }
+  ]
+}

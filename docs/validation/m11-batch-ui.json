@@ -1,0 +1,80 @@
+{
+  "scenario": "M10 real browser batch",
+  "batchNo": "BATCH-ca274af0-adc8-4eec-ab55-d9cf0827b25d",
+  "counts": {
+    "failed": 0,
+    "success": 4,
+    "total": 4,
+    "running": 0,
+    "cancelled": 0,
+    "waiting": 0
+  },
+  "children": [
+    {
+      "itemIndex": 0,
+      "admissionStatus": "CREATED",
+      "admissionFailureCode": null,
+      "admissionFailureMessage": null,
+      "jobNo": "CAE-20261012-000617",
+      "analysisType": "STRUCTURE",
+      "conditionCode": "BIW_TORSION",
+      "status": "SUCCESS",
+      "stage": "COMPLETE",
+      "failureCode": null,
+      "failureMessage": null,
+      "currentExecutionId": 236,
+      "nodeId": "node-a",
+      "pid": 807
+    },
+    {
+      "itemIndex": 1,
+      "admissionStatus": "CREATED",
+      "admissionFailureCode": null,
+      "admissionFailureMessage": null,
+      "jobNo": "CAE-20261012-000618",
+      "analysisType": "STRUCTURE",
+      "conditionCode": "BIW_TORSION",
+      "status": "SUCCESS",
+      "stage": "COMPLETE",
+      "failureCode": null,
+      "failureMessage": null,
+      "currentExecutionId": 235,
+      "nodeId": "node-a",
+      "pid": 806
+    },
+    {
+      "itemIndex": 2,
+      "admissionStatus": "CREATED",
+      "admissionFailureCode": null,
+      "admissionFailureMessage": null,
+      "jobNo": "CAE-20261012-000619",
+      "analysisType": "STRUCTURE",
+      "conditionCode": "BIW_TORSION",
+      "status": "SUCCESS",
+      "stage": "COMPLETE",
+      "failureCode": null,
+      "failureMessage": null,
+      "currentExecutionId": 237,
+      "nodeId": "node-b",
+      "pid": 816
+    },
+    {
+      "itemIndex": 3,
+      "admissionStatus": "CREATED",
+      "admissionFailureCode": null,
+      "admissionFailureMessage": null,
+      "jobNo": "CAE-20261012-000620",
+      "analysisType": "STRUCTURE",
+      "conditionCode": "BIW_TORSION",
+      "status": "SUCCESS",
+      "stage": "COMPLETE",
+      "failureCode": null,
+      "failureMessage": null,
+      "currentExecutionId": 238,
+      "nodeId": "node-b",
+      "pid": 817
+    }
+  ],
+  "noPageErrors": true,
+  "screenshot": ".local/acceptance/m9/batch-workspace.png"
+}

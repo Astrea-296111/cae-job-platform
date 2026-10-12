@@ -14,7 +14,9 @@ from agent_smoke import Api, assert_identity, terminal, wait_for
 
 def origin(value):
     parsed = urllib.parse.urlsplit(value)
-    assert parsed.scheme in {"http", "https"} and parsed.hostname, "Use an HTTP(S) origin"
+    assert parsed.scheme in {"http", "https"} and parsed.hostname, (
+        "Use an HTTP(S) origin"
+    )
     assert not parsed.username and not parsed.password, "Use environment credentials"
     assert parsed.path in {"", "/"} and not parsed.query and not parsed.fragment
     return value.rstrip("/")
@@ -59,9 +61,13 @@ def accepted_execution(backend, job_no):
     history = backend.require("GET", f"/api/v1/jobs/{job_no}/executions")
     assert len(history) == 1, "A scheduling command created multiple attempts"
     execution = history[0]
-    assert job["currentExecutionId"] == execution["id"], "Current attempt association differs"
+    assert job["currentExecutionId"] == execution["id"], (
+        "Current attempt association differs"
+    )
     assert execution["externalExecutionId"], "Agent acceptance was not persisted"
-    assert "request" not in execution, "Execution history leaked the internal submission body"
+    assert "request" not in execution, (
+        "Execution history leaked the internal submission body"
+    )
     return execution
 
 
@@ -112,21 +118,29 @@ def main():
                 range(8),
             )
         )
-    assert all(status == 202 for status, _ in responses), "Duplicate command was rejected"
+    assert all(status == 202 for status, _ in responses), (
+        "Duplicate command was rejected"
+    )
     normal_execution = accepted_execution(backend, normal_no)
     normal_worker = workers[normal_execution["nodeId"]]
     query_path = "/worker/v1/jobs/" + normal_execution["externalExecutionId"]
     identity = normal_worker.require("GET", query_path)
-    assert isinstance(identity.get("pid"), int) and identity["pid"] > 0, "No real solver PID"
+    assert isinstance(identity.get("pid"), int) and identity["pid"] > 0, (
+        "No real solver PID"
+    )
     completed = terminal(normal_worker, normal_execution["externalExecutionId"])
-    assert completed["state"] == "SUCCESS", "Synthetic solver did not complete successfully"
+    assert completed["state"] == "SUCCESS", (
+        "Synthetic solver did not complete successfully"
+    )
     assert_identity(identity, completed)
     by_request = normal_worker.require(
         "GET", "/worker/v1/jobs/by-request/" + normal_execution["submitRequestId"]
     )
     assert_identity(completed, by_request)
     normal_after = backend.require("GET", "/api/v1/jobs/" + normal_no)
-    assert normal_after["status"] == "SUBMITTED", "M4 does not install the M6 runtime monitor"
+    assert normal_after["status"] == "SUBMITTED", (
+        "M4 does not install the M6 runtime monitor"
+    )
     assert len(backend.require("GET", f"/api/v1/jobs/{normal_no}/executions")) == 1
 
     license_baseline = licenses(backend)
@@ -158,11 +172,15 @@ def main():
         timeout=30,
     )
     cancelled_remote = terminal(cancel_worker, cancel_execution["externalExecutionId"])
-    assert cancelled_remote["state"] == "CANCELLED", "Backend cancellation was not remote-confirmed"
+    assert cancelled_remote["state"] == "CANCELLED", (
+        "Backend cancellation was not remote-confirmed"
+    )
     assert_identity(running, cancelled_remote)
     cancelled_history = backend.require("GET", f"/api/v1/jobs/{cancel_no}/executions")
     assert len(cancelled_history) == 1 and cancelled_history[0]["status"] == "CANCELLED"
-    assert cancelled_history[0]["cancelRequested"] is True, "Cancellation intent was not durable"
+    assert cancelled_history[0]["cancelRequested"] is True, (
+        "Cancellation intent was not durable"
+    )
     wait_for(
         lambda: licenses(backend),
         lambda snapshot: snapshot == license_baseline,
@@ -180,14 +198,18 @@ def main():
     before_repeat = backend.require("GET", f"/api/v1/jobs/{cancel_no}/events")
     repeated = backend.require("POST", f"/api/v1/jobs/{cancel_no}/cancel", {})
     assert repeated["status"] == "CANCELLED"
-    assert repeated["version"] == cancelled_job["version"], "Repeated cancel rewrote the Job"
+    assert repeated["version"] == cancelled_job["version"], (
+        "Repeated cancel rewrote the Job"
+    )
     assert backend.require("GET", f"/api/v1/jobs/{cancel_no}/events") == before_repeat
 
     print(
         json.dumps(
             {
                 "milestone": 4,
-                "onlineNodes": [row["nodeId"] for row in ready_nodes if row["status"] == "ONLINE"],
+                "onlineNodes": [
+                    row["nodeId"] for row in ready_nodes if row["status"] == "ONLINE"
+                ],
                 "normal": {
                     "jobNo": normal_no,
                     "nodeId": normal_execution["nodeId"],

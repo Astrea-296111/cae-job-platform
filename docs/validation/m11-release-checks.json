@@ -1,0 +1,292 @@
+{
+  "atUtc": "2026-10-12T09:32:57.291393+00:00",
+  "java": {
+    "totals": {
+      "tests": 347,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "classes": [
+      {
+        "name": "com.example.cae.BootstrapTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.agent.ComputeAgentClientTest",
+        "tests": 27,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.job.JobDomainIntegrationTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.job.domain.JobStateMachineTest",
+        "tests": 27,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.job.submission.JobSubmissionIntegrationTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.job.validation.CaseValidationIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.job.validation.InputSnapshotServiceTest",
+        "tests": 30,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.messaging.InboxIntegrationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.messaging.SubmitMessagingIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.monitoring.ExecutionMonitoringIntegrationTest",
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.outbox.OutboxIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.resource.NodeRegistryIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.resource.ResourceProfileIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.resource.ResourceReservationIntegrationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.BatchAdmissionIntegrationTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.ParseMessagingIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.PipelineIntegrationTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.PlatformMetricsIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.ReportArithmeticTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.ResultParserTest",
+        "tests": 102,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.ResultParsingIntegrationTest",
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.result.UiReadModelIntegrationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.scheduler.NodeSelectionPolicyTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.scheduler.SchedulerIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.example.cae.security.ServiceTokenSecurityTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "python": {
+    "passed": 60,
+    "warnings": 15,
+    "skipped": 0
+  },
+  "staticChecks": [
+    "Spotless",
+    "Ruff lint/format: worker and all E2E scripts",
+    "ESLint",
+    "vue-tsc",
+    "Vite",
+    "Compose config"
+  ],
+  "bootstrapPassed": true,
+  "demoPassed": true,
+  "browserPassed": true,
+  "applicationImageBuilds": [
+    {
+      "tags": [
+        "cae-backend:local"
+      ],
+      "id": "sha256:c49844e2fb8a0963be24c2e966d83d677629a9321d114bff2f8620ea8952bccb"
+    },
+    {
+      "tags": [
+        "cae-worker:local"
+      ],
+      "id": "sha256:08ee8c859caa4cdc4073188c39835a0fca106addc6bbdc3dc88727a6f4110d33"
+    },
+    {
+      "tags": [
+        "cae-frontend:local"
+      ],
+      "id": "sha256:9d9714a9a1fd14c89202aa0ca68d06dea6fafd978ba57fbf63a9ecd26a3b706c"
+    }
+  ],
+  "services": [
+    {
+      "service": "backend",
+      "state": "running",
+      "health": "healthy",
+      "image": "cae-backend:local"
+    },
+    {
+      "service": "frontend",
+      "state": "running",
+      "health": "healthy",
+      "image": "cae-frontend:local"
+    },
+    {
+      "service": "grafana",
+      "state": "running",
+      "health": "healthy",
+      "image": "grafana/grafana:11.2.0"
+    },
+    {
+      "service": "mysql",
+      "state": "running",
+      "health": "healthy",
+      "image": "mysql:8.0"
+    },
+    {
+      "service": "nginx",
+      "state": "running",
+      "health": "healthy",
+      "image": "nginx:1.27-alpine"
+    },
+    {
+      "service": "prometheus",
+      "state": "running",
+      "health": "healthy",
+      "image": "prom/prometheus:v2.54.1"
+    },
+    {
+      "service": "rabbitmq",
+      "state": "running",
+      "health": "healthy",
+      "image": "rabbitmq:3.13-management"
+    },
+    {
+      "service": "redis",
+      "state": "running",
+      "health": "healthy",
+      "image": "redis:7-alpine"
+    },
+    {
+      "service": "worker-node-a",
+      "state": "running",
+      "health": "healthy",
+      "image": "cae-worker:local"
+    },
+    {
+      "service": "worker-node-b",
+      "state": "running",
+      "health": "healthy",
+      "image": "cae-worker:local"
+    },
+    {
+      "service": "worker-node-c",
+      "state": "running",
+      "health": "healthy",
+      "image": "cae-worker:local"
+    }
+  ]
+}

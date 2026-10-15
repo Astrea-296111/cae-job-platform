@@ -21,3 +21,7 @@ Platform database aggregates refresh once per five seconds into an immutable in-
 Spring Boot 3.3.6 uses Micrometer 1.13.8. We select its official `micrometer-registry-prometheus-simpleclient` compatibility implementation to preserve the required Gauge names ending in `_total`. The newer Prometheus client normalizes those suffixes away. Integration acceptance checks the actual scrape text, and live monitoring acceptance queries every provisioned dashboard expression.
 
 Job count, offline count and database totals can decrease with state changes or scoped data removal, so they are documented as Gauges. Use direct snapshots for these; apply `rate()` only to Counters. The queue statistic covers retained historical attempts, not just the latest benchmark. Load figures are recorded separately in [local benchmark](benchmark.md).
+
+## Metric contract and planned verification
+
+The [measurement contract](metrics/README.md) distinguishes API acceptance, child admission, resource wait, dispatch and execution. The current queue Gauge is an SQL average, not P95. Database row-count Gauges do not establish successful-report throughput or physical CPU utilization. The [target profile](metrics/targets.example.json) is planning-only (TARGET_NOT_MEASURED); additional stage samples, fixtures, fault-trial records and a target runner are not implemented by this documentation change.

@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "document_kind": "planning_targets",
+  "status": "TARGET_NOT_MEASURED",
+  "measured": false,
+  "description": "全部数值是待验证的验收目标或明确标注的情景假设，不是性能结果，也不是历史企业业绩。",
+  "baseline_commit": "c50dd29d1b1981e299d2ce4821e0a1ef745aa48e",
+  "runner_status": "not_implemented",
+  "environment": {
+    "scope": "public Mock deployment; isolated disposable benchmark database and MQ vhost",
+    "total_cpu_quota": 4,
+    "total_memory_gib": 32,
+    "components_share_quota": true,
+    "metadata_jobs": 10000,
+    "warmup_requests": 200,
+    "repetitions": 3,
+    "authentication": "existing HTTP Basic in public reproduction",
+    "timing": "client monotonic timer from request start through complete response, including connection setup; server timing recorded separately",
+    "comparison_policy": "rerun both versions with identical workload, warmup, storage driver and quotas; do not calculate gains against the old un-warmed record",
+    "api_only_background_mode": "background consumers and feeders paused; durable accepted intents are verified; full-chain test runs separately with background enabled",
+    "resource_capacity_note": "configured Mock CPU/memory/license ledgers do not describe real physical compute capacity"
+  },
+  "cae": [
+    {
+      "id": "job_get_p95",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "<=",
+        "value": 120,
+        "unit": "ms"
+      },
+      "workload": {
+        "concurrency": 20,
+        "measured_requests_per_repetition": 2000
+      },
+      "scope": "authenticated Job detail read; fixed 10000-row metadata set"
+    },
+    {
+      "id": "job_create_p95",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "<=",
+        "value": 400,
+        "unit": "ms"
+      },
+      "workload": {
+        "concurrency": 20,
+        "measured_requests_per_repetition": 1000
+      },
+      "scope": "durable Job creation only; no Solver execution"
+    },
+    {
+      "id": "batch_accept_p95",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "<=",
+        "value": 300,
+        "unit": "ms"
+      },
+      "workload": {
+        "concurrency": 5,
+        "batches_per_repetition": 100,
+        "children_per_batch": 50,
+        "payload_max_bytes": 262144
+      },
+      "scope": "HTTP success only after batch and all 50 intent items commit; child Job creation/validation/dispatch/execution measured separately"
+    },
+    {
+      "id": "duplicate_external_starts",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "==",
+        "value": 0,
+        "unit": "additional_processes"
+      },
+      "workload": {
+        "unique_execution_requests": 20,
+        "initial_submissions_per_execution": 1,
+        "duplicate_replays_per_execution": 25,
+        "total_duplicate_replays": 500,
+        "total_requests": 520
+      },
+      "scope": "covered replay windows after durable external execution identity; not a global exactly-once guarantee"
+    },
+    {
+      "id": "state_convergence_p95",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "<=",
+        "value": 15,
+        "unit": "s"
+      },
+      "workload": {
+        "scenarios": [
+          "backend_restart_after_agent_acceptance",
+          "submit_redelivery_after_agent_acceptance",
+          "completion_callback_loss_with_agent_query_available"
+        ],
+        "trials_per_scenario": 10,
+        "total_trials": 30
+      },
+      "scope": "recovery prerequisites ready to DB state consistent with independently queried Agent; outage duration reported separately"
+    },
+    {
+      "id": "invalid_input_detection",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "==",
+        "value": 40,
+        "unit": "correctly_rejected_invalid_cases"
+      },
+      "workload": {
+        "total_cases": 120,
+        "valid_cases": 80,
+        "invalid_cases": 40,
+        "invalid_classes": 5,
+        "cases_per_invalid_class": 8
+      },
+      "invalid_classes": [
+        "missing_entry_deck",
+        "missing_include",
+        "manifest_dependency_mismatch",
+        "unsafe_relative_path",
+        "declared_checksum_mismatch"
+      ],
+      "scope": "synthetic labelled fixture set only; invalid-label author independent from code under test"
+    },
+    {
+      "id": "valid_input_false_rejections",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "==",
+        "value": 0,
+        "unit": "rejected_valid_cases"
+      },
+      "workload": {
+        "valid_cases": 80
+      },
+      "scope": "same labelled input fixture suite; not a production failure-rate claim"
+    },
+    {
+      "id": "report_manual_minutes",
+      "status": "TARGET_NOT_MEASURED",
+      "observed": null,
+      "target": {
+        "operator": "<=",
+        "value": 15,
+        "unit": "minutes_median"
+      },
+      "workload": {
+        "paired_reports": 30,
+        "report_types": [
+          "torsion",
+          "bending",
+          "modal"
+        ],
+        "pairs_per_type": 10
+      },
+      "illustrative_baseline": {
+        "status": "ILLUSTRATIVE_ASSUMPTION",
+        "minutes_median": 60,
+        "illustrative_reduction_percent": 75
+      },
+      "scope": "human active work for equivalent standard reports including review; actual baseline and saving remain unknown; Mock rendering latency cannot replace this measurement"
+    }
+  ],
+  "arclight_appendix": {
+    "scope": "planning appendix for the separate Arclight project; no change to the Arclight repository",
+    "targets": [
+      {
+        "id": "swe_bench_lite_resolved",
+        "status": "TARGET_NOT_MEASURED",
+        "observed": null,
+        "target": {
+          "operator": ">=",
+          "value": 60,
+          "unit": "percent"
+        },
+        "workload": {
+          "instances": 300,
+          "target_resolved_instances": 180,
+          "patches_per_instance": 1
+        },
+        "guardrail": "same pinned model, task split and budget ceilings; official F2P/P2P evaluation; retain all unresolved and infrastructure cases in the reporting"
+      },
+      {
+        "id": "complete_input_token_reduction",
+        "status": "TARGET_NOT_MEASURED",
+        "observed": null,
+        "target": {
+          "operator": ">=",
+          "value": 35,
+          "unit": "percent"
+        },
+        "workload": {
+          "paired_long_session_tasks": 60
+        },
+        "guardrail": "include main/subagent, compaction and retry requests; task quality must not regress; output and cached categories reported separately"
+      },
+      {
+        "id": "initial_tool_context_reduction",
+        "status": "TARGET_NOT_MEASURED",
+        "observed": null,
+        "target": {
+          "operator": ">=",
+          "value": 70,
+          "unit": "percent"
+        },
+        "workload": {
+          "same_external_tool_schemas": 50
+        },
+        "guardrail": "identical system prompt and tokenizer/provider accounting; compare first-request input; verify tool discovery remains usable"
+      },
+      {
+        "id": "parallel_exploration_elapsed_reduction",
+        "status": "TARGET_NOT_MEASURED",
+        "observed": null,
+        "target": {
+          "operator": ">=",
+          "value": 25,
+          "unit": "percent"
+        },
+        "workload": {
+          "paired_independent_exploration_tasks": 30
+        },
+        "guardrail": "same correctness criteria, model and rate limits; median paired duration ratio reported",
+        "maximum_total_token_overhead_percent": 25
+      }
+    ]
+  }
+}

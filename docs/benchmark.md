@@ -23,3 +23,7 @@ Java 资源和 Outbox driver 在 harness 独立 schema/vhost 中使用真实事�
 复现：先 `make up` 与 `bash scripts/bootstrap.sh`，再 `make benchmark`。本次曾因测试客户端对无界流的连接关闭方式修正并重跑 HTTP 部分；当前代码显式关闭 socket，且以真实事件和 Gauge 验证断开。Java driver 独立实测与最终 HTTP 样本分别保留。
 
 证据：[HTTP/Batch/SSE 原始结果](validation/m11-benchmark.json)、[Java 资源/Outbox 原始样本](validation/m11-benchmark-java.json)。
+
+## 指标定义与后续目标
+
+本页保留既有实测记录。新的统计对象、分阶段计时、可靠性验证及人工配对计时协议见 [指标量化规范](metrics/README.md)。[目标配置](metrics/targets.example.json) 的全部数值标为 TARGET_NOT_MEASURED，尚未接入 runner，不是新的基准结果。旧记录未预热且工作负载不同，新旧版本须同条件重新运行后才能计算改进比例。
